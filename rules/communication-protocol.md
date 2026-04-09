@@ -1,6 +1,6 @@
-# communication-protocol — TCP 통신 프로토콜 상세
+# communication-protocol -- TCP 통신 프로토콜 상세
 
-## 명령어 형식 (Python → UE5)
+## 명령어 형식 (Python -> UE5)
 ```json
 {
     "id": "uuid-v4",
@@ -9,7 +9,7 @@
 }
 ```
 
-## 응답 형식 (UE5 → Python)
+## 응답 형식 (UE5 -> Python)
 ```json
 {
     "id": "matching-uuid",

@@ -1,5 +1,5 @@
 #!/bin/bash
-# no-print-debug.sh — 디버그용 print 금지 규칙
+# no-print-debug.sh -- 디버그용 print 금지 규칙
 # 생성 배경: 2026-04-06 | print("debug") 남긴 채 배포하여 로그 오염
 # 자동 교정: 가능 (--fix 모드에서 주석 처리)
 

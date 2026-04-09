@@ -1,4 +1,4 @@
-# coding-convention — Python/C++ 코딩 컨벤션 상세
+# coding-convention -- Python/C++ 코딩 컨벤션 상세
 
 ## Python (MCP 서버)
 
@@ -9,7 +9,7 @@ async def tool_name(
     param1: str,
     param2: tuple[float, float, float] = (0, 0, 0),
 ) -> str:
-    """한국어 docstring — Tool 설명.
+    """한국어 docstring -- Tool 설명.
 
     Args:
         param1: 파라미터 설명
@@ -33,18 +33,18 @@ async def tool_name(
 ### 파일 구조
 ```
 mcp-server/src/unreal_mcp/
-├── main.py            # MCP 서버 진입점
-├── connection.py      # TCP 소켓 통신
-├── tools/             # Phase별 모듈 분리
-│   ├── actor.py       # Phase 1
-│   ├── blueprint.py   # Phase 2
-│   ├── material.py    # Phase 3
-│   ├── asset.py       # Phase 3
-│   ├── ai.py          # Phase 4
-│   ├── editor.py      # Phase 5
-│   └── advanced.py    # Phase 6
-└── utils/
-    └── validators.py  # 파라미터 검증
++---- main.py            # MCP 서버 진입점
++---- connection.py      # TCP 소켓 통신
++---- tools/             # Phase별 모듈 분리
+|   +---- actor.py       # Phase 1
+|   +---- blueprint.py   # Phase 2
+|   +---- material.py    # Phase 3
+|   +---- asset.py       # Phase 3
+|   +---- ai.py          # Phase 4
+|   +---- editor.py      # Phase 5
+|   +---- advanced.py    # Phase 6
++---- utils/
+    +---- validators.py  # 파라미터 검증
 ```
 
 ---
@@ -87,14 +87,14 @@ void FUnrealMCPModule::HandleCommand(const FString& JsonString)
 ### 파일 구조
 ```
 Plugins/UnrealMCP/Source/UnrealMCP/
-├── Public/
-│   ├── UnrealMCPModule.h
-│   ├── MCPTcpServer.h
-│   └── Handlers/{Actor,Blueprint,Material,AI,Editor}Handler.h
-└── Private/
-    ├── UnrealMCPModule.cpp
-    ├── MCPTcpServer.cpp
-    └── Handlers/{Actor,Blueprint,Material,AI,Editor}Handler.cpp
++---- Public/
+|   +---- UnrealMCPModule.h
+|   +---- MCPTcpServer.h
+|   +---- Handlers/{Actor,Blueprint,Material,AI,Editor}Handler.h
++---- Private/
+    +---- UnrealMCPModule.cpp
+    +---- MCPTcpServer.cpp
+    +---- Handlers/{Actor,Blueprint,Material,AI,Editor}Handler.cpp
 ```
 
 ---

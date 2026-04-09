@@ -1,7 +1,7 @@
-# ue5-api-caution — UE5 API 사용 시 주의사항
+# ue5-api-caution -- UE5 API 사용 시 주의사항
 
 ## Blueprint 그래프 프로그래밍
-- K2Node 타입은 UE 버전에 따라 다를 수 있음 → 대상 엔진 버전(5.5+) 확인 필수
+- K2Node 타입은 UE 버전에 따라 다를 수 있음 -> 대상 엔진 버전(5.5+) 확인 필수
 - 노드 추가 후 반드시 `CompileBlueprint()` 호출
 - Event 노드(BeginPlay, Tick)는 **EventGraph에만** 추가 가능
 - Function Graph에는 FunctionEntry/FunctionResult 노드가 자동 생성됨
@@ -22,7 +22,7 @@
 - TCP 리스닝은 별도 스레드에서 수행
 - **모든 UE API 호출은 반드시 GameThread에서** 실행
 - 패턴: `AsyncTask(ENamedThreads::GameThread, [=]() { /* UE API */ });`
-- GameThread 밖에서 UE API 호출 시 → **크래시 또는 정의되지 않은 동작**
+- GameThread 밖에서 UE API 호출 시 -> **크래시 또는 정의되지 않은 동작**
 
 ## UE 버전 대응
 - 대상: Unreal Engine 5.5+

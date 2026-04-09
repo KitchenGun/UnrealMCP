@@ -1,4 +1,4 @@
-# error-handling — 에러 코드 체계 및 메시지 원칙
+# error-handling -- 에러 코드 체계 및 메시지 원칙
 
 ## 에러 코드 체계
 

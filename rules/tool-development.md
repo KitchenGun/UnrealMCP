@@ -1,4 +1,4 @@
-# tool-development — MCP Tool 추가 절차 및 Phase별 Tool 목록
+# tool-development -- MCP Tool 추가 절차 및 Phase별 Tool 목록
 
 ## 새 Tool 추가 4단계
 
@@ -85,5 +85,5 @@
 
 ## 테스트 원칙
 - 모든 Tool은 최소 **성공 1 + 에러 1** 테스트
-- Blueprint Tool은 **생성 → 수정 → 컴파일 → 스폰** 전체 플로우 테스트
+- Blueprint Tool은 **생성 -> 수정 -> 컴파일 -> 스폰** 전체 플로우 테스트
 - UE5 에디터 미실행 시 적절한 에러 메시지 반환 확인
