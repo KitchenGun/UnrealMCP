@@ -1,6 +1,6 @@
-"""Phase 1 -- Actor & Scene Tool 모음.
+"""Phase 1 -- Actor & Scene tools.
 
-UE5 레벨의 액터를 생성.삭제.변환.조회.복제.속성 읽기/쓰기하는 MCP Tool들.
+MCP tools to create/delete/transform/query/duplicate/read/write actor properties in UE5 levels.
 """
 
 import json
@@ -10,7 +10,7 @@ from ..utils.validators import validate_actor_name, validate_vector3
 
 
 def register_actor_tools(server: Server) -> None:
-    """액터 관련 Tool들을 MCP 서버에 등록한다."""
+    """Register actor-related tools to MCP server."""
 
     # --------------------------------------------------------------
     # create_actor
@@ -23,17 +23,17 @@ def register_actor_tools(server: Server) -> None:
         rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
         scale: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> str:
-        """UE5 레벨에 새 액터를 생성한다.
+        """Create a new actor in UE5 level.
 
         Args:
-            actor_class: 생성할 액터 클래스 이름.
-                         예: "StaticMeshActor", "PointLight", "SpotLight",
-                             "DirectionalLight", "CameraActor", "SkyLight",
-                             "RectLight", "ExponentialHeightFog"
-            name: 액터에 부여할 이름 (비어있으면 UE가 자동 지정).
-            location: 월드 좌표 (X, Y, Z) -- 단위: cm.
-            rotation: 회전 각도 (Pitch, Yaw, Roll) -- 단위: 도( deg).
-            scale: 스케일 (X, Y, Z). 기본값 (1, 1, 1).
+            actor_class: Actor class name to create.
+                         Examples: "StaticMeshActor", "PointLight", "SpotLight",
+                                   "DirectionalLight", "CameraActor", "SkyLight",
+                                   "RectLight", "ExponentialHeightFog"
+            name: Name to assign to actor (UE auto-assigns if empty).
+            location: World coordinates (X, Y, Z) -- Unit: cm.
+            rotation: Rotation angles (Pitch, Yaw, Roll) -- Unit: degrees.
+            scale: Scale (X, Y, Z). Default (1, 1, 1).
         """
         command = {
             "type": "create_actor",
@@ -53,10 +53,10 @@ def register_actor_tools(server: Server) -> None:
     # --------------------------------------------------------------
     @server.tool("delete_actor")
     async def delete_actor(name: str) -> str:
-        """레벨에서 지정한 이름의 액터를 삭제한다.
+        """Delete actor with specified name from level.
 
         Args:
-            name: 삭제할 액터의 이름 (정확한 이름 또는 레이블).
+            name: Name of actor to delete (exact name or label).
         """
         command = {
             "type": "delete_actor",
@@ -75,13 +75,13 @@ def register_actor_tools(server: Server) -> None:
         rotation: tuple[float, float, float] | None = None,
         scale: tuple[float, float, float] | None = None,
     ) -> str:
-        """액터의 위치.회전.스케일을 설정한다. None인 항목은 변경하지 않는다.
+        """Set actor location, rotation, and scale. Items that are None are not changed.
 
         Args:
-            name: 대상 액터 이름.
-            location: 월드 좌표 (X, Y, Z) -- 단위: cm. None이면 유지.
-            rotation: 회전 (Pitch, Yaw, Roll) -- 단위: 도( deg). None이면 유지.
-            scale: 스케일 (X, Y, Z). None이면 유지.
+            name: Target actor name.
+            location: World coordinates (X, Y, Z) -- Unit: cm. Retained if None.
+            rotation: Rotation (Pitch, Yaw, Roll) -- Unit: degrees. Retained if None.
+            scale: Scale (X, Y, Z). Retained if None.
         """
         params: dict = {"name": validate_actor_name(name)}
         if location is not None:
@@ -101,11 +101,10 @@ def register_actor_tools(server: Server) -> None:
     async def get_actors_in_level(
         actor_class_filter: str = "",
     ) -> str:
-        """현재 레벨에 있는 모든 액터 목록을 반환한다.
+        """Return list of all actors in current level.
 
         Args:
-            actor_class_filter: 특정 클래스로 필터링할 경우 클래스 이름 입력.
-                                 예: "StaticMeshActor". 비어있으면 전체 조회.
+            actor_class_filter: Class name to filter by. Example: "StaticMeshActor". Empty for all.
         """
         command = {
             "type": "get_actors_in_level",
@@ -119,15 +118,15 @@ def register_actor_tools(server: Server) -> None:
     # --------------------------------------------------------------
     @server.tool("find_actors_by_name")
     async def find_actors_by_name(pattern: str) -> str:
-        """이름 패턴으로 레벨의 액터를 검색한다 (부분 일치).
+        """Search for actors in level by name pattern (partial match).
 
         Args:
-            pattern: 검색할 이름 패턴. 대소문자 구분 없음.
-                     예: "BP_", "Light", "Player"
+            pattern: Name pattern to search. Case-insensitive.
+                     Examples: "BP_", "Light", "Player"
         """
         if not pattern.strip():
             return json.dumps(
-                {"success": False, "error": {"code": "INVALID_PARAMS", "message": "검색 패턴이 비어있습니다."}},
+                {"success": False, "error": {"code": "INVALID_PARAMS", "message": "Search pattern is empty."}},
                 indent=2, ensure_ascii=False,
             )
         command = {
@@ -146,12 +145,12 @@ def register_actor_tools(server: Server) -> None:
         new_name: str = "",
         offset: tuple[float, float, float] = (100.0, 0.0, 0.0),
     ) -> str:
-        """액터를 복제한다.
+        """Duplicate actor.
 
         Args:
-            name: 복제할 원본 액터 이름.
-            new_name: 복제본에 부여할 이름. 비어있으면 UE가 자동 지정.
-            offset: 원본 위치 대비 복제본 위치 오프셋 (X, Y, Z) -- 단위: cm.
+            name: Original actor name to duplicate.
+            new_name: Name for duplicate. UE auto-assigns if empty.
+            offset: Offset of duplicate position relative to original (X, Y, Z) -- Unit: cm.
         """
         command = {
             "type": "duplicate_actor",
@@ -169,10 +168,10 @@ def register_actor_tools(server: Server) -> None:
     # --------------------------------------------------------------
     @server.tool("get_actor_properties")
     async def get_actor_properties(name: str) -> str:
-        """액터의 주요 속성(Transform, Tags, Hidden 등)을 읽어온다.
+        """Read actor properties (Transform, Tags, Hidden, etc).
 
         Args:
-            name: 조회할 액터 이름.
+            name: Actor name to query.
         """
         command = {
             "type": "get_actor_properties",
@@ -190,20 +189,20 @@ def register_actor_tools(server: Server) -> None:
         property_name: str,
         property_value: str,
     ) -> str:
-        """액터의 특정 속성 값을 설정한다.
+        """Set specific actor property value.
 
         Args:
-            name: 대상 액터 이름.
-            property_name: 설정할 속성 이름.
-                           예: "bHidden", "Tags", "CustomDepthStencilValue"
-            property_value: 설정할 값 (JSON 문자열 형식).
-                            예: "true", "42", '"MyTag"', '["Tag1","Tag2"]'
+            name: Target actor name.
+            property_name: Name of property to set.
+                           Examples: "bHidden", "Tags", "CustomDepthStencilValue"
+            property_value: Value to set (JSON string format).
+                            Examples: "true", "42", '"MyTag"', '["Tag1","Tag2"]'
         """
-        # property_value는 JSON 문자열로 파싱하여 실제 값으로 변환
+        # Parse property_value as JSON string and convert to actual value
         try:
             parsed_value = json.loads(property_value)
         except json.JSONDecodeError:
-            # JSON 파싱 실패 시 문자열 그대로 전달
+            # If JSON parsing fails, pass string as-is
             parsed_value = property_value
 
         command = {

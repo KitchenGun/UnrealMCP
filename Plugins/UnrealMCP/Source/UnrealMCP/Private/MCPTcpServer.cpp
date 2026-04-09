@@ -1,5 +1,6 @@
 #include "MCPTcpServer.h"
 #include "Handlers/ActorHandler.h"
+#include "Handlers/BlueprintHandler.h"
 
 #include "Sockets.h"
 #include "SocketSubsystem.h"
@@ -309,6 +310,19 @@ FString FMCPTcpServer::ProcessCommand(const FString& JsonString)
     else if (Type == TEXT("set_actor_property"))
     {
         Result = FActorHandler::HandleSetActorProperty(Params);
+    }
+    // ── Phase 2: Blueprint 편집 커맨드 ───────────────────────────────
+    else if (Type == TEXT("create_blueprint")       ||
+             Type == TEXT("add_blueprint_node")     ||
+             Type == TEXT("connect_blueprint_pins") ||
+             Type == TEXT("remove_blueprint_node")  ||
+             Type == TEXT("add_blueprint_variable") ||
+             Type == TEXT("compile_blueprint")      ||
+             Type == TEXT("get_blueprint_graph")    ||
+             Type == TEXT("add_blueprint_component")||
+             Type == TEXT("spawn_blueprint_actor"))
+    {
+        Result = FBlueprintHandler::HandleCommand(Type, Params);
     }
     else
     {

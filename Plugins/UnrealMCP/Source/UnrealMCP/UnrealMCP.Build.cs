@@ -23,6 +23,10 @@ public class UnrealMCP : ModuleRules
             // JSON 직렬화
             "Json",
             "JsonUtilities",
+            // Phase 2: Blueprint 편집 API
+            "BlueprintGraph",       // UK2Node_*, UEdGraph, FBlueprintEditorUtils
+            "KismetCompiler",       // FKismetEditorUtilities::CompileBlueprint
+            "AssetTools",           // IAssetTools::CreateAsset
         });
 
         // 에디터 전용 빌드만 허용

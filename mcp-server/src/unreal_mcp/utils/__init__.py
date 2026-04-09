@@ -1,1 +1,1 @@
-"""유틸리티 모듈 패키지."""
+"""Utility module package."""

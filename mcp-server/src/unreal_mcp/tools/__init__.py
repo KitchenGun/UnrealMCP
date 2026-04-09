@@ -1,1 +1,1 @@
-"""MCP Tool 모듈 패키지."""
+"""MCP Tool module package."""

@@ -1,50 +1,50 @@
-"""파라미터 검증 유틸리티."""
+"""Parameter validation utilities."""
 
 from typing import Any
 
 
 def validate_vector3(value: Any, name: str) -> list[float]:
-    """(X, Y, Z) 형식의 3D 벡터 파라미터를 검증하고 리스트로 변환한다.
+    """Validate and convert 3D vector parameter in (X, Y, Z) format to list.
 
     Args:
-        value: 검증할 값 (tuple 또는 list).
-        name: 에러 메시지에 표시할 파라미터 이름.
+        value: Value to validate (tuple or list).
+        name: Parameter name to display in error messages.
 
     Returns:
-        [X, Y, Z] 형식의 float 리스트.
+        Float list in [X, Y, Z] format.
 
     Raises:
-        ValueError: 형식이 올바르지 않은 경우.
+        ValueError: If format is incorrect.
     """
     try:
         result = [float(v) for v in value]
     except (TypeError, ValueError) as e:
         raise ValueError(
-            f"파라미터 '{name}'은 (X, Y, Z) 형식의 숫자 3개여야 합니다. "
-            f"입력값: {value!r}"
+            f"Parameter '{name}' must be 3 numbers in (X, Y, Z) format. "
+            f"Input: {value!r}"
         ) from e
 
     if len(result) != 3:
         raise ValueError(
-            f"파라미터 '{name}'은 정확히 3개의 값이 필요합니다 (X, Y, Z). "
-            f"입력값 길이: {len(result)}"
+            f"Parameter '{name}' requires exactly 3 values (X, Y, Z). "
+            f"Input length: {len(result)}"
         )
     return result
 
 
 def validate_actor_name(name: str) -> str:
-    """액터 이름 파라미터를 검증한다.
+    """Validate actor name parameter.
 
     Args:
-        name: 액터 이름.
+        name: Actor name.
 
     Returns:
-        공백이 제거된 액터 이름.
+        Actor name with whitespace removed.
 
     Raises:
-        ValueError: 이름이 비어있는 경우.
+        ValueError: If name is empty.
     """
     name = name.strip()
     if not name:
-        raise ValueError("액터 이름은 비어있을 수 없습니다.")
+        raise ValueError("Actor name cannot be empty.")
     return name
