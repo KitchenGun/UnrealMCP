@@ -1,0 +1,51 @@
+#!/bin/bash
+# pre-commit hook: 린트 + 자동교정 + 가비지 컬렉션
+# .git/hooks/pre-commit 에 심링크하거나 복사하여 사용
+# 성공은 조용히, 실패만 시끄럽게
+
+set -euo pipefail
+
+MAX_RETRIES=3
+RULES_DIR="rules"
+FAIL_LOG="AGENTS.md"
+
+echo "🔍 pre-commit 하네스 실행 중..."
+
+# ── 1. 린트 (자동교정 루프) ──
+attempt=0
+while [ $attempt -lt $MAX_RETRIES ]; do
+  if ./scripts/lint.sh --fix --quiet 2>/dev/null; then
+    break  # 성공은 조용히
+  fi
+  attempt=$((attempt + 1))
+  echo "⚠️  자동 교정 시도 $attempt/$MAX_RETRIES"
+done
+
+if [ $attempt -eq $MAX_RETRIES ]; then
+  echo "❌ 린트 자동 교정 실패 (${MAX_RETRIES}회 시도)"
+  echo ""
+  # 실패한 줄만 보여준다 (통과 결과는 숨김)
+  ./scripts/lint.sh 2>&1 | grep -E "^(ERROR|WARN|✗)" || true
+  echo ""
+  echo "📝 rules/ 에 새 규칙 후보를 기록하세요."
+
+  # 실패 로그에 자동 기록
+  DATE=$(date +%Y-%m-%d)
+  ERRORS=$(./scripts/lint.sh 2>&1 | grep -c "ERROR" || echo "0")
+  echo "<!-- ${DATE} | pre-commit 린트 실패 (에러 ${ERRORS}건) | 검토 필요 -->" >> "$FAIL_LOG"
+
+  exit 1
+fi
+
+# ── 2. 가비지 컬렉션 ──
+if ./scripts/garbage-collect.sh 2>/dev/null; then
+  : # 성공은 조용히
+else
+  echo "⚠️  가비지 컬렉션에서 문제 발견:"
+  ./scripts/garbage-collect.sh 2>&1 | grep -E "^(STALE|DEAD|UNUSED)" || true
+fi
+
+# ── 3. 자동 스테이징 (교정된 파일 반영) ──
+git diff --name-only | xargs -r git add
+
+exit 0
