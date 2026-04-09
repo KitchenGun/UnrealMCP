@@ -1,7 +1,7 @@
 [project]
 name = "unreal-mcp"
 version = "0.1.0"
-description = "Unreal Engine 5 MCP 서버 -- 자연어로 UE5 에디터 제어"
+description = "Unreal Engine 5 MCP server -- Control UE5 editor with natural language"
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.0.0",

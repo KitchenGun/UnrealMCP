@@ -1,6 +1,6 @@
-# communication-protocol -- TCP 통신 프로토콜 상세
+# communication-protocol -- TCP Communication Protocol Details
 
-## 명령어 형식 (Python -> UE5)
+## Command Format (Python -> UE5)
 ```json
 {
     "id": "uuid-v4",
@@ -9,7 +9,7 @@
 }
 ```
 
-## 응답 형식 (UE5 -> Python)
+## Response Format (UE5 -> Python)
 ```json
 {
     "id": "matching-uuid",
@@ -19,7 +19,7 @@
 }
 ```
 
-## 에러 응답
+## Error Response
 ```json
 {
     "id": "matching-uuid",
@@ -27,22 +27,22 @@
     "result": null,
     "error": {
         "code": "ACTOR_NOT_FOUND",
-        "message": "액터 'BP_Player'를 찾을 수 없습니다"
+        "message": "Actor 'BP_Player' not found"
     }
 }
 ```
 
-## TCP 통신 규칙
-| 항목 | 값 |
-|------|-----|
-| 기본 포트 | 13377 |
-| 메시지 구분자 | `\n` (newline-delimited JSON) |
-| 재연결 간격 | 3초, 최대 10회 |
-| 기본 타임아웃 | 30초 |
-| 무거운 작업 타임아웃 | 60초 (Blueprint 컴파일 등) |
-| 동시 명령어 | 순차 처리 (UE GameThread 제약) |
+## TCP Communication Rules
+| Item | Value |
+|------|-------|
+| Default port | 13377 |
+| Message delimiter | `\n` (newline-delimited JSON) |
+| Reconnect interval | 3 seconds, max 10 attempts |
+| Default timeout | 30 seconds |
+| Heavy operation timeout | 60 seconds (Blueprint compilation, etc) |
+| Concurrent commands | Sequential processing (UE GameThread constraint) |
 
-## Claude Desktop 설정 (claude_desktop_config.json)
+## Claude Desktop Configuration (claude_desktop_config.json)
 ```json
 {
     "mcpServers": {

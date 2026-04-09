@@ -1,17 +1,17 @@
 # no-print-debug
 
-## 발생일
+## Occurrence Date
 2026-04-06
 
-## 실패 상황
-`print("debug ...")` 코드를 남긴 채 배포 -> 프로덕션 로그 오염
+## Failure Scenario
+Left `print("debug ...")` code in deployment -> Production log pollution
 
-## 규칙
-- `print("debug` / `print("test` / `print("TODO` 등 디버그용 print 금지
-- 로깅이 필요하면 `logging` 모듈 사용
+## Rule
+- Prohibit debug-related prints: `print("debug`, `print("test`, `print("TODO`, etc
+- Use `logging` module if logging is needed
 
-## 자동 교정
-`--fix` 모드에서 해당 라인을 `# REMOVED:` 주석으로 변환
+## Auto-Correction
+In `--fix` mode, convert offending line to `# REMOVED:` comment
 
-## 관련 파일
-- `rules/no-print-debug.sh` -- 자동 검사 스크립트
+## Related Files
+- `rules/no-print-debug.sh` -- Automated checking script

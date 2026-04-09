@@ -1,19 +1,19 @@
-# coding-convention -- Python/C++ 코딩 컨벤션 상세
+# coding-convention -- Python/C++ Coding Conventions
 
-## Python (MCP 서버)
+## Python (MCP Server)
 
-### Tool 정의 패턴
+### Tool Definition Pattern
 ```python
 @server.tool("tool_name")
 async def tool_name(
     param1: str,
     param2: tuple[float, float, float] = (0, 0, 0),
 ) -> str:
-    """한국어 docstring -- Tool 설명.
+    """English docstring -- Tool description.
 
     Args:
-        param1: 파라미터 설명
-        param2: (X, Y, Z) 좌표
+        param1: Parameter description
+        param2: (X, Y, Z) coordinates
     """
     command = {
         "type": "tool_name",
@@ -23,19 +23,19 @@ async def tool_name(
     return json.dumps(result, indent=2)
 ```
 
-### 필수 사항
-- 모든 Tool 함수에 **타입 힌트 + docstring** 필수
-- 파라미터 이름은 UE 용어와 일치 (location, rotation, scale)
-- 응답은 항상 **JSON 문자열**로 반환
-- **async/await** 비동기 패턴 사용
-- 에러는 MCP 표준 에러 형식으로 반환
+### Requirements
+- All Tool functions must have **type hints + docstring**
+- Parameter names must match UE terminology (location, rotation, scale)
+- Response must always return **JSON string**
+- Use **async/await** asynchronous pattern
+- Return errors in MCP standard error format
 
-### 파일 구조
+### File Structure
 ```
 mcp-server/src/unreal_mcp/
-+---- main.py            # MCP 서버 진입점
-+---- connection.py      # TCP 소켓 통신
-+---- tools/             # Phase별 모듈 분리
++---- main.py            # MCP server entry point
++---- connection.py      # TCP socket communication
++---- tools/             # Module separated by Phase
 |   +---- actor.py       # Phase 1
 |   +---- blueprint.py   # Phase 2
 |   +---- material.py    # Phase 3
@@ -44,30 +44,30 @@ mcp-server/src/unreal_mcp/
 |   +---- editor.py      # Phase 5
 |   +---- advanced.py    # Phase 6
 +---- utils/
-    +---- validators.py  # 파라미터 검증
+    +---- validators.py  # Parameter validation
 ```
 
 ---
 
-## C++ (UE5 플러그인)
+## C++ (UE5 Plugin)
 
-### Epic 코딩 컨벤션
-| 접두어 | 의미 | 예시 |
-|--------|------|------|
+### Epic Coding Convention
+| Prefix | Meaning | Example |
+|--------|---------|---------|
 | `A` | Actor | `AMyActor` |
 | `U` | UObject | `UMyComponent` |
 | `F` | Struct | `FMyStruct` |
 | `E` | Enum | `EMyEnum` |
 | `I` | Interface | `IMyInterface` |
-| `b` | bool 변수 | `bIsValid` |
+| `b` | bool variable | `bIsValid` |
 
-### 필수 사항
-- 모든 `UObject*` 멤버는 `UPROPERTY()`로 마킹
-- `IsValid()` 사용 (nullptr만으로는 PendingKill 놓침)
-- TCP 리스닝은 별도 스레드, UE API 호출은 반드시 GameThread
-- `AsyncTask(ENamedThreads::GameThread, [=]() { ... })` 패턴
+### Requirements
+- All `UObject*` members must be marked with `UPROPERTY()`
+- Use `IsValid()` (nullptr alone misses PendingKill)
+- TCP listening on separate thread, UE API calls must be on GameThread
+- Use `AsyncTask(ENamedThreads::GameThread, [=]() { ... })` pattern
 
-### 명령어 처리 패턴
+### Command Handling Pattern
 ```cpp
 void FUnrealMCPModule::HandleCommand(const FString& JsonString)
 {
@@ -84,7 +84,7 @@ void FUnrealMCPModule::HandleCommand(const FString& JsonString)
 }
 ```
 
-### 파일 구조
+### File Structure
 ```
 Plugins/UnrealMCP/Source/UnrealMCP/
 +---- Public/
@@ -99,6 +99,6 @@ Plugins/UnrealMCP/Source/UnrealMCP/
 
 ---
 
-## 공통
-- **한국어 주석**: 코드 주석과 docstring은 한국어로 작성
-- **커밋 메시지**: `feat(actor):`, `fix(blueprint):`, `docs(setup):`, `refactor(connection):`, `test(material):`
+## Common
+- **Comments**: Code comments and docstrings in English for consistency
+- **Commit messages**: `feat(actor):`, `fix(blueprint):`, `docs(setup):`, `refactor(connection):`, `test(material):`

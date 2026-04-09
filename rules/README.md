@@ -1,22 +1,22 @@
-# Rules 디렉토리
+# Rules Directory
 
-실패할 때마다 여기에 규칙을 추가합니다.
+Add rules here each time a failure occurs.
 
-## 규칙 파일 형식
+## Rule File Format
 
-### .md -- 사람이 읽는 규칙 설명
-왜 이 규칙이 생겼는지, 어떤 실패에서 왔는지 기록합니다.
+### .md -- Human-readable rule description
+Record why this rule was created and what failure led to it.
 
-### .sh -- 린터가 실행하는 자동 검사
-`./scripts/lint.sh`가 이 디렉토리의 모든 .sh를 실행합니다.
-첫 번째 인자가 "true"이면 자동 교정 모드입니다.
+### .sh -- Automated checks run by linter
+`./scripts/lint.sh` runs all .sh files in this directory.
+If first argument is "true", it's in auto-correction mode.
 
 ```bash
 #!/bin/bash
-# 규칙 스크립트 템플릿
+# Rule script template
 FIX=${1:-false}
 FOUND=0
-# 검사 로직...
+# Check logic...
 [ $FOUND -gt 0 ] && exit 1
 exit 0
 ```
