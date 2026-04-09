@@ -1,0 +1,20 @@
+{
+    "FileVersion": 3,
+    "Version": 1,
+    "VersionName": "1.0.0",
+    "FriendlyName": "UnrealMCP",
+    "Description": "자연어로 UE5 에디터를 제어하는 MCP(Model Context Protocol) 플러그인. TCP 포트 13377에서 Python MCP 서버의 명령을 수신합니다.",
+    "Category": "Editor",
+    "CreatedBy": "UnrealMCP Project",
+    "CreatedByURL": "",
+    "DoesNotNeedEngineToLoad": false,
+    "IsExperimentalVersion": true,
+    "Installed": false,
+    "Modules": [
+        {
+            "Name": "UnrealMCP",
+            "Type": "Editor",
+            "LoadingPhase": "PostEngineInit"
+        }
+    ]
+}
