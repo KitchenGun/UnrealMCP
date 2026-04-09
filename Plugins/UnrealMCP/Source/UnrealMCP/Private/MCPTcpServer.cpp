@@ -1,6 +1,10 @@
 #include "MCPTcpServer.h"
 #include "Handlers/ActorHandler.h"
 #include "Handlers/BlueprintHandler.h"
+#include "Handlers/MaterialHandler.h"
+#include "Handlers/AIHandler.h"
+#include "Handlers/EditorHandler.h"
+#include "Handlers/AdvancedHandler.h"
 
 #include "Sockets.h"
 #include "SocketSubsystem.h"
@@ -323,6 +327,53 @@ FString FMCPTcpServer::ProcessCommand(const FString& JsonString)
              Type == TEXT("spawn_blueprint_actor"))
     {
         Result = FBlueprintHandler::HandleCommand(Type, Params);
+    }
+    // ── Phase 3: Material & Asset 커맨드 ─────────────────────────────
+    else if (Type == TEXT("search_assets")           ||
+             Type == TEXT("get_asset_details")       ||
+             Type == TEXT("create_material")         ||
+             Type == TEXT("add_material_expression") ||
+             Type == TEXT("connect_material_nodes")  ||
+             Type == TEXT("apply_material_to_actor") ||
+             Type == TEXT("set_material_parameter")  ||
+             Type == TEXT("import_asset")            ||
+             Type == TEXT("duplicate_asset")         ||
+             Type == TEXT("delete_asset"))
+    {
+        Result = FMaterialHandler::HandleCommand(Type, Params);
+    }
+    // ── Phase 4: AI System 커맨드 ────────────────────────────────────
+    else if (Type == TEXT("create_behavior_tree")  ||
+             Type == TEXT("add_bt_node")           ||
+             Type == TEXT("create_blackboard")     ||
+             Type == TEXT("add_blackboard_key")    ||
+             Type == TEXT("create_eqs_query")      ||
+             Type == TEXT("setup_ai_perception")   ||
+             Type == TEXT("create_ai_controller"))
+    {
+        Result = FAIHandler::HandleCommand(Type, Params);
+    }
+    // ── Phase 5: Editor Automation 커맨드 ────────────────────────────
+    else if (Type == TEXT("play_in_editor")      ||
+             Type == TEXT("set_viewport_camera") ||
+             Type == TEXT("run_console_command") ||
+             Type == TEXT("take_screenshot")     ||
+             Type == TEXT("get_selected_actors") ||
+             Type == TEXT("select_actors")       ||
+             Type == TEXT("save_level")          ||
+             Type == TEXT("load_level"))
+    {
+        Result = FEditorHandler::HandleCommand(Type, Params);
+    }
+    // ── Phase 6: Advanced Systems 커맨드 ─────────────────────────────
+    else if (Type == TEXT("create_niagara_system")      ||
+             Type == TEXT("create_animation_blueprint") ||
+             Type == TEXT("create_widget_blueprint")    ||
+             Type == TEXT("create_data_table")          ||
+             Type == TEXT("create_data_asset")          ||
+             Type == TEXT("inspect_uobject"))
+    {
+        Result = FAdvancedHandler::HandleCommand(Type, Params);
     }
     else
     {

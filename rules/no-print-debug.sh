@@ -24,4 +24,4 @@ while IFS= read -r file; do
 done < <(find . -name "*.py" -not -path "./.venv/*" -not -path "./node_modules/*")
 
 [ $FOUND -gt 0 ] && exit 1
-exit 0
+exit

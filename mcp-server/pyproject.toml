@@ -16,4 +16,4 @@ build-backend = "hatchling.build"
 packages = ["src/unreal_mcp"]
 
 [project.scripts]
-unreal-mcp = "unreal_mcp.main:main"
+unreal-mcp = "unreal_mcp.main
