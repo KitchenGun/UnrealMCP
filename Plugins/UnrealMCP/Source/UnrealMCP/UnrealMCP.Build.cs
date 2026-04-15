@@ -31,9 +31,8 @@ public class UnrealMCP : ModuleRules
             "AssetRegistry",            // FAssetRegistryModule
             "MaterialEditor",           // UMaterialEditingLibrary
             // Phase 4: AI System
-            "AIModule",                 // UAIController, UBlackboardData, UBehaviorTree
+            "AIModule",                 // UAIController, UBlackboardData, UBehaviorTree, UEnvQuery (EQS는 AIModule에 포함)
             "GameplayTasks",            // AI 태스크 기반 시스템
-            "EnvironmentQuery",         // UEnvQuery
             // Phase 5: Editor Automation
             "LevelEditor",              // ULevelEditorSubsystem, FLevelEditorViewportClient
             // Phase 6: Advanced Systems

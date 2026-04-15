@@ -23,6 +23,7 @@
 #include "Materials/MaterialExpressionLinearInterpolate.h"
 #include "Materials/MaterialExpressionFresnel.h"
 #include "MaterialEditingLibrary.h"
+#include "Materials/MaterialInstanceConstant.h"
 
 // 팩토리 / 임포트
 #include "Factories/MaterialFactoryNew.h"
@@ -657,7 +658,7 @@ TSharedPtr<FJsonObject> FMaterialHandler::SetMaterialParameter(const TSharedPtr<
     {
         float Value = ValueField.IsValid() ? static_cast<float>(ValueField->AsNumber()) : 0.f;
         bSet = UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue(
-            Cast<UMaterialInstance>(Material), FName(*ParamName), Value);
+            Cast<UMaterialInstanceConstant>(Material), FName(*ParamName), Value);
 
         // UMaterial 자체의 ScalarParameter 기본값 변경
         if (!bSet)
@@ -692,7 +693,7 @@ TSharedPtr<FJsonObject> FMaterialHandler::SetMaterialParameter(const TSharedPtr<
         }
 
         bSet = UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue(
-            Cast<UMaterialInstance>(Material), FName(*ParamName), Color);
+            Cast<UMaterialInstanceConstant>(Material), FName(*ParamName), Color);
 
         if (!bSet)
         {

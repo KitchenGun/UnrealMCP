@@ -12,6 +12,8 @@
 
 // PIE
 #include "LevelEditorSubsystem.h"
+#include "Selection.h"
+#include "UObject/SavePackage.h"
 
 // 레벨
 #include "FileHelpers.h"
@@ -133,21 +135,14 @@ TSharedPtr<FJsonObject> FEditorHandler::PlayInEditor(const TSharedPtr<FJsonObjec
         // PIE 시작
         FRequestPlaySessionParams PlayParams;
 
-        if (Mode == TEXT("mobile_preview"))
+        // UE5.5: EPlaySessionWorldType 값 변경 (PlayInEditorViewport/NewWindow/StandaloneProcess 제거)
+        if (Mode == TEXT("standalone"))
         {
-            PlayParams.WorldType = EPlaySessionWorldType::PlayInEditorViewport;
+            PlayParams.WorldType = EPlaySessionWorldType::PlayInEditor;
         }
-        else if (Mode == TEXT("new_editor_window"))
+        else  // viewport, new_editor_window, mobile_preview → 모두 PIE
         {
-            PlayParams.WorldType = EPlaySessionWorldType::NewWindow;
-        }
-        else if (Mode == TEXT("standalone"))
-        {
-            PlayParams.WorldType = EPlaySessionWorldType::StandaloneProcess;
-        }
-        else  // viewport (기본)
-        {
-            PlayParams.WorldType = EPlaySessionWorldType::PlayInEditorViewport;
+            PlayParams.WorldType = EPlaySessionWorldType::PlayInEditor;
         }
 
         GEditor->RequestPlaySession(PlayParams);
@@ -162,7 +157,8 @@ TSharedPtr<FJsonObject> FEditorHandler::PlayInEditor(const TSharedPtr<FJsonObjec
     {
         if (GEditor->PlayWorld)
         {
-            GEditor->SetPlayInEditorWorld(GEditor->PlayWorld);
+            // UE5.5: SetPlayInEditorWorld은 전역 함수로 변경됨
+            ::SetPlayInEditorWorld(GEditor->PlayWorld);
             GEditor->PlayWorld->bDebugPauseExecution = !GEditor->PlayWorld->bDebugPauseExecution;
             ResultMessage = GEditor->PlayWorld->bDebugPauseExecution
                 ? TEXT("PIE 일시정지") : TEXT("PIE 재개");
@@ -480,8 +476,10 @@ TSharedPtr<FJsonObject> FEditorHandler::SaveLevel(const TSharedPtr<FJsonObject>&
         FPackageName::TryConvertLongPackageNameToFilename(
             LevelPath, FileName, FPackageName::GetMapPackageExtension());
 
-        bSaved = UPackage::SavePackage(Package, nullptr,
-            *FileName, SAVE_NoError);
+        // UE5.5: SavePackage 시그니처 변경 → FSavePackageArgs 사용
+        FSavePackageArgs SaveArgs;
+        SaveArgs.SaveFlags = SAVE_NoError;
+        bSaved = UPackage::SavePackage(Package, nullptr, *FileName, SaveArgs);
         SavedPath = LevelPath;
     }
 

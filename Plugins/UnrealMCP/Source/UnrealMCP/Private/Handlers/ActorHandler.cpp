@@ -13,7 +13,9 @@
 #include "Engine/ExponentialHeightFog.h"
 #include "Camera/CameraActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "GameFramework/Actor.h"
+#include "Selection.h"
 
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
@@ -471,7 +473,8 @@ TSharedPtr<FJsonObject> FActorHandler::HandleDuplicateActor(const TSharedPtr<FJs
     // 원본 액터 선택 후 복제
     GEditor->SelectNone(false, true, false);
     GEditor->SelectActor(SourceActor, true, false, true);
-    GEditor->edactDuplicateSelected(SourceActor->GetLevel(), false, true, true, Offset);
+    // UE5.5: edactDuplicateSelected 시그니처 변경 (2파라미터만 지원)
+    GEditor->edactDuplicateSelected(SourceActor->GetLevel(), true);
 
     // 복제된 액터 참조 (복제 후 선택된 액터)
     AActor* DupActor = nullptr;
@@ -553,8 +556,15 @@ TSharedPtr<FJsonObject> FActorHandler::HandleGetActorProperties(const TSharedPtr
     }
     Result->SetArrayField(TEXT("tags"), TagArray);
 
-    // CustomDepthStencilValue (렌더링 관련)
-    Result->SetNumberField(TEXT("custom_depth_stencil_value"), Actor->CustomDepthStencilValue);
+    // CustomDepthStencilValue (UE5.5: AActor에서 제거 → UPrimitiveComponent에 있음)
+    {
+        int32 StencilVal = 0;
+        if (UPrimitiveComponent* PC = Actor->FindComponentByClass<UPrimitiveComponent>())
+        {
+            StencilVal = PC->CustomDepthStencilValue;
+        }
+        Result->SetNumberField(TEXT("custom_depth_stencil_value"), StencilVal);
+    }
 
     return MakeSuccess(Result);
 }
@@ -597,7 +607,7 @@ TSharedPtr<FJsonObject> FActorHandler::HandleSetActorProperty(const TSharedPtr<F
     {
         bool bHidden = Value.IsValid() ? Value->AsBool() : false;
         Actor->SetActorHiddenInGame(bHidden);
-        Actor->bHidden = bHidden;
+        // UE5.5: bHidden은 private → SetActorHiddenInGame으로 대체
         bHandled = true;
     }
     else if (PropertyName.Equals(TEXT("ActorLabel"), ESearchCase::IgnoreCase))
@@ -625,9 +635,13 @@ TSharedPtr<FJsonObject> FActorHandler::HandleSetActorProperty(const TSharedPtr<F
     }
     else if (PropertyName.Equals(TEXT("CustomDepthStencilValue"), ESearchCase::IgnoreCase))
     {
+        // UE5.5: CustomDepthStencilValue은 UPrimitiveComponent에 있음
         if (Value.IsValid())
         {
-            Actor->CustomDepthStencilValue = static_cast<int32>(Value->AsNumber());
+            if (UPrimitiveComponent* PC = Actor->FindComponentByClass<UPrimitiveComponent>())
+            {
+                PC->SetCustomDepthStencilValue(static_cast<int32>(Value->AsNumber()));
+            }
             Actor->MarkPackageDirty();
             bHandled = true;
         }

@@ -21,7 +21,7 @@
 // Widget Blueprint
 #include "Blueprint/UserWidget.h"
 #include "WidgetBlueprint.h"
-#include "Factories/WidgetBlueprintFactory.h"
+#include "WidgetBlueprintFactory.h"
 
 // DataTable
 #include "Engine/DataTable.h"
@@ -34,7 +34,8 @@
 // Niagara
 #include "NiagaraSystem.h"
 #include "NiagaraEmitter.h"
-#include "Factories/NiagaraSystemFactoryNew.h"
+// UNiagaraSystemFactoryNew은 API 매크로 없음 → StaticLoadClass로 런타임 로드
+#include "Factories/Factory.h"
 
 // UObject 리플렉션
 #include "UObject/UnrealType.h"
@@ -116,7 +117,15 @@ TSharedPtr<FJsonObject> FAdvancedHandler::CreateNiagaraSystem(const TSharedPtr<F
         return MakeError(TEXT("INTERNAL_ERROR"), TEXT("패키지 생성 실패."));
     }
 
-    UNiagaraSystemFactoryNew* Factory = NewObject<UNiagaraSystemFactoryNew>();
+    // UE5.5: UNiagaraSystemFactoryNew는 API 매크로 없어 직접 링크 불가 → 런타임 로드
+    UClass* FactoryClass = StaticLoadClass(
+        UFactory::StaticClass(), nullptr,
+        TEXT("/Script/NiagaraEditor.NiagaraSystemFactoryNew"));
+    if (!FactoryClass)
+    {
+        return MakeError(TEXT("INTERNAL_ERROR"), TEXT("NiagaraEditor 팩토리 클래스를 찾을 수 없습니다."));
+    }
+    UFactory* Factory = NewObject<UFactory>(GetTransientPackage(), FactoryClass);
     UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(
         Factory->FactoryCreateNew(UNiagaraSystem::StaticClass(), Package, FName(*Name),
                                    RF_Public | RF_Standalone, nullptr, GWarn));

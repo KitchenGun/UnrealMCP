@@ -10,6 +10,12 @@
     "DoesNotNeedEngineToLoad": false,
     "IsExperimentalVersion": true,
     "Installed": false,
+    "Plugins": [
+        {
+            "Name": "Niagara",
+            "Enabled": true
+        }
+    ],
     "Modules": [
         {
             "Name": "UnrealMCP",

@@ -7,6 +7,7 @@
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
 #include "Factories/BlueprintFactory.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "EdGraph/EdGraph.h"

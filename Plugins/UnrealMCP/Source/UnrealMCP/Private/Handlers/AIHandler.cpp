@@ -41,8 +41,6 @@
 // EQS
 #include "EnvironmentQuery/EnvQuery.h"
 
-// Factories
-#include "Factories/EnvQueryFactory.h"
 
 // JSON
 #include "Dom/JsonObject.h"
@@ -134,16 +132,18 @@ TSharedPtr<FJsonObject> FAIHandler::CreateBehaviorTree(const TSharedPtr<FJsonObj
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*BlackboardName));
+        // UE5.5: AssetNames 제거 → ClassPaths+PackagePaths 조회 후 이름 필터
         Filter.ClassPaths.Add(
             FTopLevelAssetPath(FName(TEXT("/Script/AIModule")), FName(TEXT("BlackboardData"))));
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AR.Get().GetAssets(Filter, Assets);
 
-        if (Assets.Num() > 0)
+        FName BBFName(*BlackboardName);
+        FAssetData* Found = Assets.FindByPredicate([&](const FAssetData& AD){ return AD.AssetName == BBFName; });
+        if (Found)
         {
-            UBlackboardData* BB = Cast<UBlackboardData>(Assets[0].GetAsset());
+            UBlackboardData* BB = Cast<UBlackboardData>(Found->GetAsset());
             if (IsValid(BB))
             {
                 BT->BlackboardAsset = BB;
@@ -183,15 +183,17 @@ TSharedPtr<FJsonObject> FAIHandler::AddBTNode(const TSharedPtr<FJsonObject>& Par
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*BTName));
+        // UE5.5: AssetNames 제거 → ClassPaths+PackagePaths 조회 후 이름 필터
         Filter.ClassPaths.Add(
             FTopLevelAssetPath(FName(TEXT("/Script/AIModule")), FName(TEXT("BehaviorTree"))));
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AR.Get().GetAssets(Filter, Assets);
-        if (Assets.Num() > 0)
+        FName BTFName(*BTName);
+        FAssetData* FoundBT = Assets.FindByPredicate([&](const FAssetData& AD){ return AD.AssetName == BTFName; });
+        if (FoundBT)
         {
-            BT = Cast<UBehaviorTree>(Assets[0].GetAsset());
+            BT = Cast<UBehaviorTree>(FoundBT->GetAsset());
         }
     }
 
@@ -287,15 +289,17 @@ TSharedPtr<FJsonObject> FAIHandler::AddBlackboardKey(const TSharedPtr<FJsonObjec
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*BBName));
+        // UE5.5: AssetNames 제거 → ClassPaths+PackagePaths 조회 후 이름 필터
         Filter.ClassPaths.Add(
             FTopLevelAssetPath(FName(TEXT("/Script/AIModule")), FName(TEXT("BlackboardData"))));
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AR.Get().GetAssets(Filter, Assets);
-        if (Assets.Num() > 0)
+        FName BBFName2(*BBName);
+        FAssetData* FoundBB = Assets.FindByPredicate([&](const FAssetData& AD){ return AD.AssetName == BBFName2; });
+        if (FoundBB)
         {
-            BB = Cast<UBlackboardData>(Assets[0].GetAsset());
+            BB = Cast<UBlackboardData>(FoundBB->GetAsset());
         }
     }
 
@@ -420,16 +424,20 @@ TSharedPtr<FJsonObject> FAIHandler::SetupAIPerception(const TSharedPtr<FJsonObje
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*AIControllerName));
+        // UE5.5: AssetNames 제거 → PackagePaths 조회 후 이름 필터
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AR.Get().GetAssets(Filter, Assets);
+        FName AICFName(*AIControllerName);
         for (const FAssetData& Asset : Assets)
         {
-            if (UBlueprint* BP = Cast<UBlueprint>(Asset.GetAsset()))
+            if (Asset.AssetName == AICFName)
             {
-                BPAsset = BP;
-                break;
+                if (UBlueprint* BP = Cast<UBlueprint>(Asset.GetAsset()))
+                {
+                    BPAsset = BP;
+                    break;
+                }
             }
         }
     }
