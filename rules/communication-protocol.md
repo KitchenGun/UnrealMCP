@@ -51,4 +51,8 @@
             "args": [
                 "--directory", "C:/Projects/unreal-mcp/mcp-server",
                 "run", "src/unreal_mcp/main.py"
-         
+            ]
+        }
+    }
+}
+```

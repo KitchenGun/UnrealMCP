@@ -101,4 +101,4 @@ Plugins/UnrealMCP/Source/UnrealMCP/
 
 ## Common
 - **Comments**: Code comments and docstrings in English for consistency
-- **Commit messages**: `feat(actor):`, `fix(blueprint):`, `docs(setup):`, `refactor(connection):`, `test(ma
+- **Commit messages**: `feat(actor):`, `fix(blueprint):`, `docs(setup):`, `refactor(connection):`, `test(material):`
