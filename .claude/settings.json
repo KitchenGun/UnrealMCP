@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreCompact\",\"additionalContext\":\"[UE5 슈팅게임 아키텍처 핵심 보존]\\n게임: 3D그래픽 2D종스크롤 슈팅 / 기획서 위치: C:/Users/kang9/Downloads/슈팅게임_기획서.pdf\\n\\n[확정 결정사항]\\n1. GAS 미사용 - 커스텀 컴포넌트(Health/Shield/SuperWeapon/Loadout) + GameplayTag 독립 사용\\n2. 핵심 타입: ETargetLayer(Universal/Air/Ground), EUnitLayer(Air/Ground), ESuperWeaponCategory(Offensive/Defensive/Utility)\\n3. 히트판정: CanDamage(WeaponLayer, UnitLayer) 헬퍼 함수로 단순화\\n4. 플레이어 컴포넌트: ULoadoutComponent / UWeaponFireComponent / USuperWeaponComponent / UHealthComponent / UShieldComponent / UPlayerMovementExt\\n5. Shield 피해 흡수 우선순위: ShieldHP 먼저 → 잔여는 HealthComponent 전달\\n6. 보스: ABossBase + FBossPhaseData(DataTable) + HP% 기반 페이즈 전환 + 3D 변신 연출\\n7. 웨이브: DataTable(FWaveRowData) 기반 + UCampaignState(Subsystem)로 동적 파라미터 조절\\n8. 슈퍼웨폰: 게이지->스톡 전환, 충전 3경로(적격파/자연충전/아이템)\\n9. 스코어링 3축: 격파속도보너스 / 연속격파체인 / 슈퍼웨폰미사용\\n10. 개발우선순위: P0(판정/로드아웃/생존/기동) → P1(보스/슈퍼웨폰/브리핑/평가) → P2(스코어링/해금/캠페인)\"}}' 2>/dev/null || true",
+            "statusMessage": "게임 아키텍처 컨텍스트 보존 중..."
+          }
+        ]
+      }
+    ]
+  }
+}
