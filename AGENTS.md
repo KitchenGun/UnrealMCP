@@ -46,5 +46,8 @@ Claude Desktop --(stdio)--> Python MCP Server --(TCP:13377)--> UE5 C++ Plugin --
 - `rules/error-handling.md` - Error code system and message principles
 - `rules/ue5-api-caution.md` - UE5 API usage cautions
 
+## Related: Shooting Game Planning
+UE5 종스크롤 슈팅게임 아키텍처 설계 중. 상세 컨텍스트 → `CLAUDE.md`
+
 ## Failure Log
 <!-- Example: 2026-04-08 | UE API called outside GameThread -> crash | rules/ue5-api-caution.md added -->
