@@ -9,6 +9,8 @@
 #include "IAssetTools.h"
 
 // 머티리얼
+#include "MaterialShared.h"
+#include "MaterialDomain.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpression.h"
 #include "Materials/MaterialExpressionConstant.h"
@@ -299,11 +301,14 @@ TSharedPtr<FJsonObject> FMaterialHandler::AddMaterialExpression(const TSharedPtr
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*MaterialName));
         Filter.ClassPaths.Add(FTopLevelAssetPath(FName(TEXT("/Script/Engine")), FName(TEXT("Material"))));
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AssetRegistry.Get().GetAssets(Filter, Assets);
+        Assets = Assets.FilterByPredicate([&MaterialName](const FAssetData& AD)
+        {
+            return AD.AssetName == FName(*MaterialName);
+        });
         if (Assets.Num() > 0)
         {
             Material = Cast<UMaterial>(Assets[0].GetAsset());
@@ -457,11 +462,14 @@ TSharedPtr<FJsonObject> FMaterialHandler::ConnectMaterialNodes(const TSharedPtr<
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*MaterialName));
         Filter.ClassPaths.Add(FTopLevelAssetPath(FName(TEXT("/Script/Engine")), FName(TEXT("Material"))));
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AR.Get().GetAssets(Filter, Assets);
+        Assets = Assets.FilterByPredicate([&MaterialName](const FAssetData& AD)
+        {
+            return AD.AssetName == FName(*MaterialName);
+        });
         if (Assets.Num() > 0)
         {
             Material = Cast<UMaterial>(Assets[0].GetAsset());
@@ -635,11 +643,14 @@ TSharedPtr<FJsonObject> FMaterialHandler::SetMaterialParameter(const TSharedPtr<
             FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
         TArray<FAssetData> Assets;
         FARFilter Filter;
-        Filter.AssetNames.Add(FName(*MaterialName));
         Filter.ClassPaths.Add(FTopLevelAssetPath(FName(TEXT("/Script/Engine")), FName(TEXT("Material"))));
         Filter.bRecursivePaths = true;
         Filter.PackagePaths.Add(FName(TEXT("/Game")));
         AR.Get().GetAssets(Filter, Assets);
+        Assets = Assets.FilterByPredicate([&MaterialName](const FAssetData& AD)
+        {
+            return AD.AssetName == FName(*MaterialName);
+        });
         if (Assets.Num() > 0)
         {
             Material = Cast<UMaterial>(Assets[0].GetAsset());

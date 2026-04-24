@@ -1,6 +1,6 @@
 {
   "dxt_version": "0.2",
-  "name": "unreal-mcp",
+  "name": "Unreal_Engine_MCP",
   "display_name": "Unreal Engine MCP",
   "version": "0.1.0",
   "description": "Unreal Engine 5 MCP server -- Control UE5 editor with natural language.",

@@ -5,6 +5,7 @@
 #include "Handlers/AIHandler.h"
 #include "Handlers/EditorHandler.h"
 #include "Handlers/AdvancedHandler.h"
+#include "Handlers/LightHandler.h"
 
 #include "Sockets.h"
 #include "SocketSubsystem.h"
@@ -76,12 +77,11 @@ void FMCPTcpServer::Stop()
 {
     bStopping = true;
 
-    // 소켓을 닫아 Run()의 블로킹 호출(Accept/Recv)에서 깨어나도록 함
+    // Close()만 호출 — HasPendingConnection/Accept 블로킹을 깨운다.
+    // DestroySocket(메모리 해제)은 스레드 종료 후 수행해야 use-after-free를 막을 수 있다.
     if (ListenSocket)
     {
         ListenSocket->Close();
-        ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(ListenSocket);
-        ListenSocket = nullptr;
     }
 
     if (Thread)
@@ -89,6 +89,13 @@ void FMCPTcpServer::Stop()
         Thread->WaitForCompletion();
         delete Thread;
         Thread = nullptr;
+    }
+
+    // Run()이 완전히 종료된 뒤 안전하게 소켓 해제
+    if (ListenSocket)
+    {
+        ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(ListenSocket);
+        ListenSocket = nullptr;
     }
 }
 
@@ -375,6 +382,15 @@ FString FMCPTcpServer::ProcessCommand(const FString& JsonString)
     {
         Result = FAdvancedHandler::HandleCommand(Type, Params);
     }
+    // ── Light 커맨드 ──────────────────────────────────────────────────
+    else if (Type == TEXT("set_light_property"))
+    {
+        Result = FLightHandler::HandleSetLightProperty(Params);
+    }
+    else if (Type == TEXT("get_light_property"))
+    {
+        Result = FLightHandler::HandleGetLightProperty(Params);
+    }
     else
     {
         Result = MakeShared<FJsonObject>();
@@ -392,9 +408,10 @@ FString FMCPTcpServer::ProcessCommand(const FString& JsonString)
         Result->SetStringField(TEXT("id"), Id);
     }
 
-    // JSON 직렬화
+    // JSON 직렬화 (compact: readline() 호환을 위해 단일 줄 출력)
     FString OutputString;
-    TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+    TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> Writer =
+        TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&OutputString);
     FJsonSerializer::Serialize(Result.ToSharedRef(), Writer);
     return OutputString;
 }
@@ -412,7 +429,8 @@ FString FMCPTcpServer::MakeErrorResponse(const FString& Id, const FString& Code,
     Response->SetObjectField(TEXT("error"), ErrorObj);
 
     FString OutputString;
-    TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+    TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> Writer =
+        TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&OutputString);
     FJsonSerializer::Serialize(Response.ToSharedRef(), Writer);
     return OutputString;
 }

@@ -48,8 +48,13 @@ Get-ChildItem -Path $destSrc -Include "__pycache__" -Recurse -Directory | Remove
 Write-Host "[build-dxt] vendoring dependencies to lib/..."
 $libDir = Join-Path $BuildDir "lib"
 # PowerShell 5.1: 2>&1 금지 - pip stderr가 NativeCommandError로 래핑되어 Stop 트리거됨
-& python -m pip install --target $libDir --no-compile --quiet "mcp>=1.0.0" "anyio>=4.0.0"
+# cmd /c 안에서 stderr를 NUL로 보내고 출력은 임시파일 → 문제 없음
+$pipLog = Join-Path $env:TEMP "unreal-mcp-pip.log"
+$pipCmd = "python -m pip install --target `"$libDir`" --no-compile `"mcp>=1.0.0`" `"anyio>=4.0.0`" > `"$pipLog`" 2>&1"
+cmd /c $pipCmd
 if ($LASTEXITCODE -ne 0) {
+    Write-Host "pip log:"
+    Get-Content $pipLog -Tail 30 | ForEach-Object { Write-Host "  $_" }
     throw "pip install failed (exit $LASTEXITCODE)"
 }
 Get-ChildItem -Path $libDir -Include "__pycache__" -Recurse -Directory | Remove-Item -Recurse -Force
