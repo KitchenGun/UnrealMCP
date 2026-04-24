@@ -1,0 +1,49 @@
+{
+  "dxt_version": "0.2",
+  "name": "unreal-mcp",
+  "display_name": "Unreal Engine MCP",
+  "version": "0.1.0",
+  "description": "Unreal Engine 5 MCP server -- Control UE5 editor with natural language.",
+  "long_description": "Claude Desktop과 UE5 에디터를 연결하는 MCP 서버. stdio로 Claude Desktop과 통신하고 TCP:13377로 UE5 C++ 플러그인과 연결됩니다.\n\n**주요 기능 (7 Phase)**\n- Phase 1: Actor & Scene (액터 스폰/조작)\n- Phase 2: Blueprint 편집 (노드/변수/컴포넌트)\n- Phase 3: Material & Asset\n- Phase 4: AI System (Behavior Tree, AIPerception)\n- Phase 5: Editor Automation\n- Phase 6: Advanced Systems\n- Phase 7: World Builder\n\n**요구사항**\n- Python 3.11+ (시스템 설치)\n- UnrealMCP 플러그인이 활성화된 UE5 프로젝트 (TCP 13377 수신)",
+  "author": {
+    "name": "UnrealMCP",
+    "url": "https://github.com/KitchenGun/UnrealMCP"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KitchenGun/UnrealMCP"
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "src/unreal_mcp/main.py",
+    "mcp_config": {
+      "command": "python",
+      "args": [
+        "-m",
+        "unreal_mcp.main"
+      ],
+      "env": {
+        "PYTHONPATH": "${__dirname}/lib;${__dirname}/src"
+      }
+    }
+  },
+  "tools_generated": true,
+  "keywords": [
+    "unreal",
+    "ue5",
+    "gamedev",
+    "blueprint",
+    "editor",
+    "mcp"
+  ],
+  "license": "MIT",
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "win32"
+    ],
+    "runtimes": {
+      "python": ">=3.11"
+    }
+  }
+}
