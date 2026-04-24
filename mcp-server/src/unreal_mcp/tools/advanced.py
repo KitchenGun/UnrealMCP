@@ -5,7 +5,7 @@ Niagara, AnimBlueprint, Widget Blueprint, DataTable, DataAsset, UObject inspecti
 """
 
 import json
-from mcp.server import Server
+from mcp.server.fastmcp import FastMCP as Server
 from ..connection import send_command
 
 

@@ -4,7 +4,7 @@ MCP tools to create/delete/transform/query/duplicate/read/write actor properties
 """
 
 import json
-from mcp.server import Server
+from mcp.server.fastmcp import FastMCP as Server
 from ..connection import send_command
 from ..utils.validators import validate_actor_name, validate_vector3
 

@@ -22,3 +22,13 @@ Saved/
 # OS
 .DS_Store
 Thumbs.db
+
+# Build artifacts
+build/
+dist/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Config backups
+*.bak

@@ -5,7 +5,7 @@ Behavior Tree, Blackboard, EQS, AIPerception, AIController.
 """
 
 import json
-from mcp.server import Server
+from mcp.server.fastmcp import FastMCP as Server
 from ..connection import send_command
 
 

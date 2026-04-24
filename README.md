@@ -59,32 +59,38 @@ python -m unreal_mcp
 
 ---
 
-### 3단계 — Claude Desktop 연결 설정
+### 3단계 — Claude Desktop에 DXT 확장 설치
 
-Claude Desktop 설정 파일에 MCP 서버를 등록합니다.
+> Claude Desktop **1.3883.0.0 이상**은 레거시 `claude_desktop_config.json`의 `mcpServers` 필드를 지원하지 않습니다. DXT 확장으로 설치합니다.
 
-**설정 파일 위치:**
+**방법 A — 빌드된 `.dxt` 파일 사용 (권장)**
 
-| OS | 경로 |
-|----|------|
-| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
-| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+1. [Releases 페이지](https://github.com/KitchenGun/UnrealMCP/releases)에서 `unreal-mcp-<version>.dxt` 다운로드 (또는 직접 빌드: [아래 참고](#dxt-직접-빌드))
+2. Claude Desktop 실행 → **설정(Settings)** → **확장(Extensions)** / **커넥터(Connectors)**
+3. **"파일에서 설치"** / 드래그 앤 드롭 → `.dxt` 파일 선택
+4. 설치 확인 팝업에서 **Install** 클릭
+5. Claude Desktop 자동 재시작 후 `Unreal Engine MCP` 서버가 활성화됨
 
-**설정 내용:**
+**방법 B — 개발 모드 (소스 직접 반영)**
 
-```json
-{
-  "mcpServers": {
-    "unreal-mcp": {
-      "command": "python",
-      "args": ["-m", "unreal_mcp"],
-      "cwd": "C:/경로/UnrealMCP/mcp-server/src"
-    }
-  }
-}
+툴 추가/수정을 자주 할 경우, 설치 후 아래 스크립트로 설치본을 원본에 심볼릭 링크:
+
+```powershell
+# 관리자 권한 PowerShell 또는 Windows 개발자 모드 활성화 필요
+.\scripts\dev-link.ps1
 ```
 
-> `uv` 환경 사용 시 `"command": "uv"`, `"args": ["run", "python", "-m", "unreal_mcp"]`로 변경하세요.
+이후 `mcp-server/src/unreal_mcp/**` 원본을 수정하면 Claude Desktop 재시작만으로 반영됩니다 (재빌드 불필요).
+
+#### DXT 직접 빌드
+
+```powershell
+# PowerShell (Windows)
+.\scripts\build-dxt.ps1
+# → dist\unreal-mcp-<version>.dxt 생성
+```
+
+빌드 과정: `mcp-server/src/` 복사 → `pip install -t lib/` 의존성 벤더링 → `manifest.json` 포함 → zip 압축.
 
 ---
 
