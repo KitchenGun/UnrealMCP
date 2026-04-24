@@ -14,6 +14,8 @@ Claude Desktop ──(MCP/stdio)──▶ Python MCP Server ──(TCP:13377)─
 
 ### 1단계 — UE5 플러그인 설치 및 빌드
 
+**방법 A — 직접 복사 (일회성)**
+
 `Plugins/UnrealMCP/` 폴더 전체를 본인의 UE5 프로젝트 `Plugins/` 폴더에 복사합니다.
 
 ```
@@ -22,6 +24,15 @@ MyUE5Project/
     └── UnrealMCP/   ← 이 폴더를 복사
         ├── Source/
         └── UnrealMCP.uplugin
+```
+
+**방법 B — 심볼릭 링크 배포 (개발 권장)**
+
+UnrealMCP 본체 소스가 변경될 때 대상 프로젝트에 즉시 반영됩니다.
+
+```powershell
+# 관리자 권한 또는 Windows 개발자 모드 필요
+.\scripts\deploy-to-project.ps1 -ProjectPath E:\MyUE5Project
 ```
 
 UE5 에디터를 열면 "새 모듈이 감지되었습니다. 지금 빌드하시겠습니까?" 팝업이 나타납니다. **Yes** 클릭.
@@ -115,6 +126,8 @@ python -m unreal_mcp
 "M_Rock 머티리얼을 만들고 SM_Rock_01 액터에 적용해줘"
 "PIE 시작해줘"
 "뷰포트 카메라를 (0, 0, 500) 위치로 이동해줘"
+"PointLight_0의 밝기를 5000으로, 색상을 노란색(1.0, 0.9, 0.3)으로 바꿔줘"
+"SM_Rock을 5×5 그리드로 100cm 간격으로 배치해줘"
 ```
 
 ---
@@ -131,14 +144,16 @@ UnrealMCP/
 │       │   ├── MaterialHandler.h
 │       │   ├── AIHandler.h
 │       │   ├── EditorHandler.h
-│       │   └── AdvancedHandler.h
+│       │   ├── AdvancedHandler.h
+│       │   └── LightHandler.h
 │       ├── Private/Handlers/                 # 핸들러 구현
 │       │   ├── ActorHandler.cpp
 │       │   ├── BlueprintHandler.cpp
 │       │   ├── MaterialHandler.cpp
 │       │   ├── AIHandler.cpp
 │       │   ├── EditorHandler.cpp
-│       │   └── AdvancedHandler.cpp
+│       │   ├── AdvancedHandler.cpp
+│       │   └── LightHandler.cpp
 │       └── Private/MCPTcpServer.cpp          # TCP 서버 (포트 13377)
 │
 ├── mcp-server/                               # Python MCP 서버
@@ -146,12 +161,14 @@ UnrealMCP/
 │       ├── main.py                           # 서버 진입점
 │       ├── connection.py                     # TCP 통신
 │       └── tools/                            # MCP Tool 정의
-│           ├── actor.py       (Phase 1)
-│           ├── blueprint.py   (Phase 2)
-│           ├── material.py    (Phase 3)
-│           ├── ai_system.py   (Phase 4)
-│           ├── editor.py      (Phase 5)
-│           └── advanced.py    (Phase 6)
+│           ├── actor.py         (Phase 1)
+│           ├── blueprint.py     (Phase 2)
+│           ├── material.py      (Phase 3)
+│           ├── ai_system.py     (Phase 4)
+│           ├── editor.py        (Phase 5)
+│           ├── advanced.py      (Phase 6)
+│           ├── world_builder.py (Phase 7)
+│           └── light.py         (Phase 8)
 │
 └── rules/                                    # 개발 규칙 문서
 ```
@@ -168,8 +185,10 @@ UnrealMCP/
 | 4 | AI 시스템 | 7개 | create_behavior_tree, add_bt_node, create_blackboard, add_blackboard_key, create_eqs_query, setup_ai_perception, create_ai_controller |
 | 5 | 에디터 자동화 | 8개 | play_in_editor, set_viewport_camera, run_console_command, take_screenshot, get_selected_actors, select_actors, save_level, load_level |
 | 6 | 고급 시스템 | 6개 | create_niagara_system, create_animation_blueprint, create_widget_blueprint, create_data_table, create_data_asset, inspect_uobject |
+| 7 | 월드 빌더 | 6개 | spawn_actor_grid, spawn_actor_circle, spawn_actor_scatter, spawn_actor_line, spawn_actor_batch, mirror_actors |
+| 8 | Light 제어 | 2개 | set_light_property, get_light_property |
 
-**총 48개 MCP Tools**
+**총 56개 MCP Tools**
 
 ---
 
