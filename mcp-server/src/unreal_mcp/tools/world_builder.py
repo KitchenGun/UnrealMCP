@@ -85,7 +85,7 @@ def register_world_builder_tools(server: Server) -> None:
         rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
         scale: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> str:
-        """N×M 그리드로 동일한 액터를 반복 배치한다.
+        """[WorldBuilder] N×M 그리드로 동일한 액터를 반복 배치한다.
 
         Args:
             actor_class: 생성할 UE5 액터 클래스 이름 (예: "PointLight", "StaticMeshActor")
@@ -128,7 +128,7 @@ def register_world_builder_tools(server: Server) -> None:
         face_center: bool = False,
         scale: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> str:
-        """원형으로 액터를 균등 배치한다.
+        """[WorldBuilder] 원형으로 액터를 균등 배치한다.
 
         Args:
             actor_class: 생성할 UE5 액터 클래스 이름
@@ -174,7 +174,7 @@ def register_world_builder_tools(server: Server) -> None:
         seed: int = 42,
         height_variance: float = 0.0,
     ) -> str:
-        """지정 영역 내에 액터를 결정론적으로 랜덤 산포한다.
+        """[WorldBuilder] 지정 영역 내에 액터를 결정론적으로 랜덤 산포한다.
 
         같은 seed 값을 사용하면 항상 동일한 배치 결과를 보장한다.
 
@@ -217,7 +217,7 @@ def register_world_builder_tools(server: Server) -> None:
         end: tuple[float, float, float] = (1000.0, 0.0, 0.0),
         scale: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ) -> str:
-        """두 점 사이에 액터를 선형으로 균등 배치한다.
+        """[WorldBuilder] 두 점 사이에 액터를 선형으로 균등 배치한다.
 
         Args:
             actor_class: 생성할 UE5 액터 클래스 이름
@@ -252,7 +252,7 @@ def register_world_builder_tools(server: Server) -> None:
     async def spawn_actor_batch(
         actors: list[dict],
     ) -> str:
-        """다수의 액터 명세를 한 번에 일괄 생성한다.
+        """[WorldBuilder] 다수의 액터 명세를 한 번에 일괄 생성한다.
 
         각 명세(dict)에는 다음 필드를 포함할 수 있다:
         - class (필수): UE5 액터 클래스 이름
@@ -322,7 +322,7 @@ def register_world_builder_tools(server: Server) -> None:
         axis: str = "X",
         origin: tuple[float, float, float] = (0.0, 0.0, 0.0),
     ) -> str:
-        """액터 목록을 지정한 축 기준으로 대칭 복제한다.
+        """[WorldBuilder] 액터 목록을 지정한 축 기준으로 대칭 복제한다.
 
         원본 액터의 위치를 origin 기준으로 반사한 위치에 새 액터를 생성한다.
         복제된 액터 이름은 '{원본이름}_Mirror' 규칙을 따른다.

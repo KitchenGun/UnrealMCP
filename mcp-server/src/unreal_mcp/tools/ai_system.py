@@ -21,7 +21,7 @@ def register_ai_tools(server: Server) -> None:
         save_path: str = "/Game/AI",
         blackboard_name: str = "",
     ) -> str:
-        """새 Behavior Tree 에셋을 생성한다.
+        """[AI] 새 Behavior Tree 에셋을 생성한다.
 
         Args:
             name: Behavior Tree 에셋 이름 (예: "BT_EnemyAI").
@@ -51,7 +51,7 @@ def register_ai_tools(server: Server) -> None:
         parent_node_id: str = "",
         node_params: str = "{}",
     ) -> str:
-        """Behavior Tree에 노드를 추가한다.
+        """[AI] Behavior Tree에 노드를 추가한다.
 
         Args:
             behavior_tree_name: 대상 Behavior Tree 에셋 이름.
@@ -96,7 +96,7 @@ def register_ai_tools(server: Server) -> None:
         name: str,
         save_path: str = "/Game/AI",
     ) -> str:
-        """새 Blackboard Data 에셋을 생성한다.
+        """[AI] 새 Blackboard Data 에셋을 생성한다.
 
         Args:
             name: Blackboard 에셋 이름 (예: "BB_EnemyAI").
@@ -122,7 +122,7 @@ def register_ai_tools(server: Server) -> None:
         key_type: str,
         key_params: str = "{}",
     ) -> str:
-        """Blackboard에 키를 추가한다.
+        """[AI] Blackboard에 키를 추가한다.
 
         Args:
             blackboard_name: 대상 Blackboard 에셋 이름.
@@ -163,7 +163,7 @@ def register_ai_tools(server: Server) -> None:
         save_path: str = "/Game/AI",
         generator_type: str = "Donut",
     ) -> str:
-        """새 EQS(Environment Query System) 쿼리 에셋을 생성한다.
+        """[AI] 새 EQS(Environment Query System) 쿼리 에셋을 생성한다.
 
         Args:
             name: EQS 쿼리 에셋 이름 (예: "EQS_FindCover", "EQS_FindPatrolPoint").
@@ -198,7 +198,7 @@ def register_ai_tools(server: Server) -> None:
         hearing_range: float = 1000.0,
         dominant_sense: str = "Sight",
     ) -> str:
-        """AIController Blueprint에 AIPerception 컴포넌트 설정을 추가한다.
+        """[AI] AIController Blueprint에 AIPerception 컴포넌트 설정을 추가한다.
 
         Args:
             ai_controller_name: 대상 AIController Blueprint 이름
@@ -234,7 +234,7 @@ def register_ai_tools(server: Server) -> None:
         behavior_tree_name: str = "",
         enable_perception: bool = True,
     ) -> str:
-        """새 AIController Blueprint를 생성하고 기본 설정을 구성한다.
+        """[AI] 새 AIController Blueprint를 생성하고 기본 설정을 구성한다.
 
         RunBehaviorTree 노드와 AIPerception 컴포넌트를 자동으로 추가한다.
 

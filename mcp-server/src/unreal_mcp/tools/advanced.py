@@ -7,6 +7,11 @@ Niagara, AnimBlueprint, Widget Blueprint, DataTable, DataAsset, UObject inspecti
 import json
 from mcp.server.fastmcp import FastMCP as Server
 from ..connection import send_command
+from ..utils.property_categories import (
+    UOBJECT_CATEGORIES,
+    filter_by_categories,
+    parse_csv,
+)
 
 
 def register_advanced_tools(server: Server) -> None:
@@ -21,7 +26,7 @@ def register_advanced_tools(server: Server) -> None:
         save_path: str = "/Game/VFX",
         template: str = "Empty",
     ) -> str:
-        """새 Niagara System 에셋을 생성한다.
+        """[Advanced] 새 Niagara System 에셋을 생성한다.
 
         Args:
             name: Niagara System 에셋 이름 (예: "NS_Explosion", "NS_Fire").
@@ -52,7 +57,7 @@ def register_advanced_tools(server: Server) -> None:
         skeleton_path: str = "",
         parent_class: str = "AnimInstance",
     ) -> str:
-        """새 Animation Blueprint 에셋을 생성한다.
+        """[Advanced] 새 Animation Blueprint 에셋을 생성한다.
 
         Args:
             name: Animation Blueprint 이름 (예: "ABP_Character").
@@ -84,7 +89,7 @@ def register_advanced_tools(server: Server) -> None:
         save_path: str = "/Game/UI",
         parent_class: str = "UserWidget",
     ) -> str:
-        """새 Widget Blueprint (UMG) 에셋을 생성한다.
+        """[Advanced] 새 Widget Blueprint (UMG) 에셋을 생성한다.
 
         Args:
             name: Widget Blueprint 이름 (예: "WBP_HUD", "WBP_MainMenu").
@@ -114,7 +119,7 @@ def register_advanced_tools(server: Server) -> None:
         row_struct: str,
         save_path: str = "/Game/Data",
     ) -> str:
-        """새 DataTable 에셋을 생성한다.
+        """[Advanced] 새 DataTable 에셋을 생성한다.
 
         Args:
             name: DataTable 에셋 이름 (예: "DT_ItemStats", "DT_EnemyConfig").
@@ -144,7 +149,7 @@ def register_advanced_tools(server: Server) -> None:
         asset_class: str,
         save_path: str = "/Game/Data",
     ) -> str:
-        """새 DataAsset 에셋을 생성한다.
+        """[Advanced] 새 DataAsset 에셋을 생성한다.
 
         Args:
             name: DataAsset 이름 (예: "DA_WeaponConfig", "DA_EnemyData").
@@ -173,8 +178,11 @@ def register_advanced_tools(server: Server) -> None:
         include_properties: bool = True,
         include_functions: bool = False,
         property_filter: str = "",
+        category: str = "",
+        max_properties: int = 0,
+        max_functions: int = 0,
     ) -> str:
-        """UObject의 리플렉션 정보를 검사한다.
+        """[Advanced] UObject의 리플렉션 정보를 검사한다.
 
         클래스 계층, UPROPERTY 목록, UFUNCTION 목록을 반환한다.
 
@@ -186,6 +194,14 @@ def register_advanced_tools(server: Server) -> None:
             include_functions: True이면 UFUNCTION 목록 포함.
             property_filter: 속성 이름 필터 (부분 일치).
                              빈 문자열이면 전체 속성 반환.
+            category: 콤마 구분 카테고리 화이트리스트.
+                      예: "transform,rendering,collision,gameplay". 빈 문자열이면 전체.
+            max_properties: 최대 property 개수. 0=무제한(기본).
+            max_functions: 최대 function 개수. 0=무제한(기본).
+
+        Returns:
+            JSON with class hierarchy, properties, functions. truncation 시
+            `truncated_properties_at`, `truncated_functions_at` 추가.
         """
         command = {
             "type": "inspect_uobject",
@@ -194,7 +210,36 @@ def register_advanced_tools(server: Server) -> None:
                 "include_properties": include_properties,
                 "include_functions": include_functions,
                 "property_filter": property_filter.strip(),
+                # Forward truncation hints so C++ can stop serializing past the cap.
+                "max_properties": int(max_properties),
+                "max_functions": int(max_functions),
             },
         }
         result = await send_command(command)
+
+        if isinstance(result, dict) and result.get("success"):
+            inner = result.get("result")
+            if isinstance(inner, dict):
+                categories = parse_csv(category)
+                props = inner.get("properties")
+                if isinstance(props, list):
+                    if categories:
+                        props = filter_by_categories(
+                            props, categories,
+                            name_key="name",
+                            category_map=UOBJECT_CATEGORIES,
+                        )
+                    if max_properties and len(props) > max_properties:
+                        inner["truncated_properties_at"] = max_properties
+                        inner["total_property_count"] = len(props)
+                        props = props[:max_properties]
+                    inner["properties"] = props
+                fns = inner.get("functions")
+                if isinstance(fns, list):
+                    if max_functions and len(fns) > max_functions:
+                        inner["truncated_functions_at"] = max_functions
+                        inner["total_function_count"] = len(fns)
+                        fns = fns[:max_functions]
+                    inner["functions"] = fns
+
         return json.dumps(result, indent=2, ensure_ascii=False)

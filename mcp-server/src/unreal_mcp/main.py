@@ -19,6 +19,7 @@ from .tools.editor import register_editor_tools
 from .tools.advanced import register_advanced_tools
 from .tools.world_builder import register_world_builder_tools
 from .tools.light import register_light_tools
+from .adapter.middleware import install_response_middleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -97,6 +98,17 @@ def _normalize_schema(node):
 for _tool in server._tool_manager._tools.values():
     if _tool.parameters:
         _normalize_schema(_tool.parameters)
+
+
+# --------------------------------------------------------------------------
+# Phase B: install response post-processing middleware.
+# Wraps every registered Tool.fn with a mode-aware wrapper that reduces
+# token usage on Claude Desktop calls. Modes: raw|compact|summary|hermes
+# (env: UNREAL_MCP_RESPONSE_MODE, default=summary). This is the *only* place
+# the FastMCP path enters the ResponseAdapter — `mcp_adapter.py` remains
+# self-contained for external Hermes callers.
+# --------------------------------------------------------------------------
+install_response_middleware(server)
 
 
 def _start_parent_watchdog() -> None:

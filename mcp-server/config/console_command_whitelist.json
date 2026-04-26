@@ -1,0 +1,20 @@
+{
+  "_comment": "Whitelist for run_console_command tool. Loaded by adapter/safety_gate.py. Override path via UNREAL_MCP_CONSOLE_WHITELIST env var.",
+  "prefixes": [
+    "r.",
+    "stat ",
+    "t.",
+    "ShowFlag.",
+    "Slate.",
+    "DumpConsoleCommands",
+    "log ",
+    "memreport"
+  ],
+  "deny_prefixes": [
+    "quit",
+    "exit",
+    "DestroyAll",
+    "obj gc",
+    "DisconnectAllSessions"
+  ]
+}

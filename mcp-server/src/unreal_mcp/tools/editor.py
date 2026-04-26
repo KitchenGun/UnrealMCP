@@ -21,7 +21,7 @@ def register_editor_tools(server: Server) -> None:
         action: str = "play",
         mode: str = "viewport",
     ) -> str:
-        """에디터 내 플레이(PIE) 세션을 제어한다.
+        """[Editor] 에디터 내 플레이(PIE) 세션을 제어한다.
 
         Args:
             action: 수행할 작업.
@@ -54,7 +54,7 @@ def register_editor_tools(server: Server) -> None:
         rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
         viewport_index: int = 0,
     ) -> str:
-        """에디터 뷰포트 카메라 위치와 회전을 설정한다.
+        """[Editor] 에디터 뷰포트 카메라 위치와 회전을 설정한다.
 
         Args:
             location: 카메라 월드 위치 (X, Y, Z) -- 단위: cm.
@@ -77,7 +77,7 @@ def register_editor_tools(server: Server) -> None:
     # ------------------------------------------------------------------
     @server.tool("run_console_command")
     async def run_console_command(command_string: str) -> str:
-        """UE5 에디터 콘솔 명령을 실행한다.
+        """[Editor] UE5 에디터 콘솔 명령을 실행한다. 화이트리스트 검증 적용.
 
         Args:
             command_string: 실행할 콘솔 명령 문자열.
@@ -112,7 +112,7 @@ def register_editor_tools(server: Server) -> None:
         height: int = 1080,
         show_ui: bool = False,
     ) -> str:
-        """에디터 뷰포트 스크린샷을 캡처한다.
+        """[Editor] 에디터 뷰포트 스크린샷을 캡처한다.
 
         Args:
             file_name: 저장 파일 이름 (확장자 없이).
@@ -139,7 +139,7 @@ def register_editor_tools(server: Server) -> None:
     # ------------------------------------------------------------------
     @server.tool("get_selected_actors")
     async def get_selected_actors() -> str:
-        """에디터에서 현재 선택된 액터 목록을 반환한다.
+        """[Editor] 에디터에서 현재 선택된 액터 목록을 반환한다.
 
         Returns:
             선택된 액터의 이름, 클래스, 트랜스폼 정보 목록.
@@ -159,7 +159,7 @@ def register_editor_tools(server: Server) -> None:
         actor_names: list[str],
         append_to_selection: bool = False,
     ) -> str:
-        """에디터에서 지정한 액터를 선택한다.
+        """[Editor] 에디터에서 지정한 액터를 선택한다.
 
         Args:
             actor_names: 선택할 액터 이름 목록.
@@ -189,7 +189,7 @@ def register_editor_tools(server: Server) -> None:
     # ------------------------------------------------------------------
     @server.tool("save_level")
     async def save_level(level_path: str = "") -> str:
-        """현재 레벨 (또는 지정 레벨)을 저장한다.
+        """[Editor] 현재 레벨 (또는 지정 레벨)을 저장한다.
 
         Args:
             level_path: 저장할 레벨 경로.
@@ -208,7 +208,7 @@ def register_editor_tools(server: Server) -> None:
     # ------------------------------------------------------------------
     @server.tool("load_level")
     async def load_level(level_path: str) -> str:
-        """지정 경로의 레벨을 에디터에서 연다.
+        """[Editor] 지정 경로의 레벨을 에디터에서 연다.
 
         Args:
             level_path: 열 레벨 에셋 경로.

@@ -354,7 +354,19 @@ TSharedPtr<FJsonObject> FActorHandler::HandleGetActorsInLevel(const TSharedPtr<F
 
     FString ClassFilter = Params->GetStringField(TEXT("actor_class_filter")).TrimStartAndEnd();
 
+    // Phase A C++ filter — `limit` truncates after class filter while still
+    // counting the un-truncated total so callers see how much was hidden.
+    int32 ActorLimit = 0;
+    {
+        double LimitD = 0.0;
+        if (Params->TryGetNumberField(TEXT("limit"), LimitD) && LimitD > 0.0)
+        {
+            ActorLimit = static_cast<int32>(LimitD);
+        }
+    }
+
     TArray<TSharedPtr<FJsonValue>> ActorList;
+    int32 MatchedCount = 0;
 
     for (TActorIterator<AActor> It(World); It; ++It)
     {
@@ -377,12 +389,21 @@ TSharedPtr<FJsonObject> FActorHandler::HandleGetActorsInLevel(const TSharedPtr<F
             continue;
         }
 
-        ActorList.Add(MakeShared<FJsonValueObject>(ActorToJson(Actor)));
+        MatchedCount++;
+        if (ActorLimit == 0 || ActorList.Num() < ActorLimit)
+        {
+            ActorList.Add(MakeShared<FJsonValueObject>(ActorToJson(Actor)));
+        }
     }
 
     TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
     Result->SetArrayField(TEXT("actors"), ActorList);
     Result->SetNumberField(TEXT("count"), ActorList.Num());
+    Result->SetNumberField(TEXT("total_count"), MatchedCount);
+    if (ActorLimit > 0 && MatchedCount > ActorLimit)
+    {
+        Result->SetNumberField(TEXT("truncated_at"), ActorLimit);
+    }
     return MakeSuccess(Result);
 }
 

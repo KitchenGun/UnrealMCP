@@ -19,8 +19,10 @@ def register_material_tools(server: Server) -> None:
         query: str,
         asset_class_filter: str = "",
         search_path: str = "/Game",
+        limit: int = 50,
+        offset: int = 0,
     ) -> str:
-        """에셋 레지스트리에서 에셋을 검색한다.
+        """[Material] 에셋 레지스트리에서 에셋을 검색한다.
 
         Args:
             query: 검색 쿼리 문자열 (에셋 이름 부분 일치).
@@ -30,6 +32,12 @@ def register_material_tools(server: Server) -> None:
                    빈 문자열이면 전체 클래스 검색.
             search_path: 검색 루트 경로.
                    예: "/Game", "/Game/Materials", "/Engine".
+            limit: 페이지 크기. 기본 50. 0=무제한(비권장).
+            offset: 페이지 시작 인덱스. 기본 0.
+
+        Returns:
+            JSON with `assets` array. 페이지네이션 시 `total_count`, `returned`, `next_offset`,
+            `has_more` 필드 추가.
         """
         command = {
             "type": "search_assets",
@@ -37,9 +45,31 @@ def register_material_tools(server: Server) -> None:
                 "query": query.strip(),
                 "asset_class_filter": asset_class_filter.strip(),
                 "search_path": search_path.strip(),
+                # Forward pagination so C++ doesn't ship the full match set over TCP.
+                "limit": int(limit),
+                "offset": int(offset),
             },
         }
         result = await send_command(command)
+
+        if isinstance(result, dict) and result.get("success"):
+            inner = result.get("result")
+            if isinstance(inner, dict):
+                assets = inner.get("assets")
+                if isinstance(assets, list):
+                    # Python fallback: trust C++ pagination if `total_count` is
+                    # already populated; otherwise paginate locally for older plugins.
+                    if "total_count" not in inner:
+                        total = len(assets)
+                        start = max(0, offset)
+                        end = total if not limit else min(total, start + limit)
+                        page = assets[start:end]
+                        inner["assets"] = page
+                        inner["total_count"] = total
+                        inner["returned"] = len(page)
+                        inner["next_offset"] = end if end < total else -1
+                        inner["has_more"] = end < total
+
         return json.dumps(result, indent=2, ensure_ascii=False)
 
     # ------------------------------------------------------------------
@@ -47,12 +77,16 @@ def register_material_tools(server: Server) -> None:
     # ------------------------------------------------------------------
     @server.tool("get_asset_details")
     async def get_asset_details(asset_path: str) -> str:
-        """에셋의 상세 정보를 반환한다.
+        """[Material] 에셋의 상세 정보를 반환한다.
 
         Args:
             asset_path: 에셋의 콘텐츠 브라우저 경로.
                         예: "/Game/Materials/M_Rock",
                             "/Game/Meshes/SM_Cube"
+
+        Returns:
+            JSON with asset metadata: name, asset_class, package_path,
+            object_path, dependencies. 자세한 노드/속성 조회는 inspect_uobject 사용.
         """
         command = {
             "type": "get_asset_details",
@@ -71,7 +105,7 @@ def register_material_tools(server: Server) -> None:
         material_domain: str = "Surface",
         blend_mode: str = "Opaque",
     ) -> str:
-        """새 머티리얼 에셋을 생성한다.
+        """[Material] 새 머티리얼 에셋을 생성한다.
 
         Args:
             name: 머티리얼 에셋 이름 (예: "M_Rock", "M_Glass").
@@ -106,7 +140,7 @@ def register_material_tools(server: Server) -> None:
         position_y: float = 0.0,
         expression_params: str = "{}",
     ) -> str:
-        """머티리얼 그래프에 표현식(노드)을 추가한다.
+        """[Material] 머티리얼 그래프에 표현식(노드)을 추가한다.
 
         Args:
             material_name: 대상 머티리얼 에셋 이름.
@@ -152,7 +186,7 @@ def register_material_tools(server: Server) -> None:
         target_expression_id: str,
         target_input_name: str,
     ) -> str:
-        """머티리얼 그래프에서 두 노드를 연결한다.
+        """[Material] 머티리얼 그래프에서 두 노드를 연결한다.
 
         Args:
             material_name: 대상 머티리얼 에셋 이름.
@@ -189,7 +223,7 @@ def register_material_tools(server: Server) -> None:
         material_path: str,
         slot_index: int = 0,
     ) -> str:
-        """액터의 StaticMeshComponent에 머티리얼을 적용한다.
+        """[Material] 액터의 StaticMeshComponent에 머티리얼을 적용한다.
 
         Args:
             actor_name: 대상 액터 이름.
@@ -219,7 +253,7 @@ def register_material_tools(server: Server) -> None:
         parameter_type: str,
         value: str,
     ) -> str:
-        """머티리얼의 파라미터 기본값을 설정한다.
+        """[Material] 머티리얼의 파라미터 기본값을 설정한다.
 
         Args:
             material_name: 대상 머티리얼 에셋 이름.
@@ -255,7 +289,7 @@ def register_material_tools(server: Server) -> None:
         destination_path: str = "/Game/Imports",
         asset_name: str = "",
     ) -> str:
-        """외부 파일을 UE5 에셋으로 임포트한다.
+        """[Material] 외부 파일을 UE5 에셋으로 임포트한다.
 
         Args:
             source_file_path: 임포트할 파일의 절대 경로.
@@ -285,7 +319,7 @@ def register_material_tools(server: Server) -> None:
         new_name: str,
         destination_path: str = "",
     ) -> str:
-        """에셋을 복제한다.
+        """[Material] 에셋을 복제한다.
 
         Args:
             source_asset_path: 복제할 원본 에셋 경로.
@@ -309,7 +343,7 @@ def register_material_tools(server: Server) -> None:
     # ------------------------------------------------------------------
     @server.tool("delete_asset")
     async def delete_asset(asset_path: str, force_delete: bool = False) -> str:
-        """에셋을 삭제한다.
+        """[Material] 에셋을 삭제한다.
 
         Args:
             asset_path: 삭제할 에셋의 콘텐츠 브라우저 경로.

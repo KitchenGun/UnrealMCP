@@ -668,6 +668,40 @@ TSharedPtr<FJsonObject> FBlueprintHandler::GetBlueprintGraph(const TSharedPtr<FJ
     Params->TryGetStringField(TEXT("blueprint_name"), BPName);
     Params->TryGetStringField(TEXT("graph_name"), GraphName);
 
+    // Phase A C++ filters — defaults preserve original behavior for any
+    // direct C++ caller; Python tool always forwards explicit values.
+    bool bIncludePositions = true;
+    bool bIncludePinLinks = true;
+    bool bDropReroute = false;
+    int32 NodeLimit = 0;
+    FString NodeClassFilter;
+    Params->TryGetBoolField(TEXT("include_positions"), bIncludePositions);
+    Params->TryGetBoolField(TEXT("include_pin_links"), bIncludePinLinks);
+    Params->TryGetBoolField(TEXT("drop_reroute"), bDropReroute);
+    {
+        double LimitD = 0.0;
+        if (Params->TryGetNumberField(TEXT("limit"), LimitD) && LimitD > 0.0)
+        {
+            NodeLimit = static_cast<int32>(LimitD);
+        }
+    }
+    Params->TryGetStringField(TEXT("node_class_filter"), NodeClassFilter);
+
+    TSet<FString> ClassWhitelist;
+    if (!NodeClassFilter.IsEmpty())
+    {
+        TArray<FString> Tokens;
+        NodeClassFilter.ParseIntoArray(Tokens, TEXT(","), true);
+        for (const FString& T : Tokens)
+        {
+            const FString Trimmed = T.TrimStartAndEnd();
+            if (!Trimmed.IsEmpty())
+            {
+                ClassWhitelist.Add(Trimmed);
+            }
+        }
+    }
+
     UBlueprint* BP = FindBlueprintByName(BPName);
     if (!BP)
     {
@@ -694,17 +728,28 @@ TSharedPtr<FJsonObject> FBlueprintHandler::GetBlueprintGraph(const TSharedPtr<FJ
             FString::Printf(TEXT("그래프를 찾을 수 없습니다: %s"), *GraphName));
     }
 
+    const int32 OriginalCount = TargetGraph->Nodes.Num();
+    int32 IncludedCount = 0;
     TArray<TSharedPtr<FJsonValue>> NodeArray;
     for (UEdGraphNode* Node : TargetGraph->Nodes)
     {
         if (!Node) continue;
 
+        const FString NodeClass = Node->GetClass()->GetName();
+
+        if (bDropReroute && NodeClass == TEXT("K2Node_Knot")) continue;
+        if (ClassWhitelist.Num() > 0 && !ClassWhitelist.Contains(NodeClass)) continue;
+        if (NodeLimit > 0 && IncludedCount >= NodeLimit) break;
+
         auto NodeObj = MakeShared<FJsonObject>();
         NodeObj->SetStringField(TEXT("node_id"), Node->NodeGuid.ToString());
-        NodeObj->SetStringField(TEXT("node_class"), Node->GetClass()->GetName());
+        NodeObj->SetStringField(TEXT("node_class"), NodeClass);
         NodeObj->SetStringField(TEXT("node_title"), Node->GetNodeTitle(ENodeTitleType::FullTitle).ToString());
-        NodeObj->SetNumberField(TEXT("position_x"), Node->NodePosX);
-        NodeObj->SetNumberField(TEXT("position_y"), Node->NodePosY);
+        if (bIncludePositions)
+        {
+            NodeObj->SetNumberField(TEXT("position_x"), Node->NodePosX);
+            NodeObj->SetNumberField(TEXT("position_y"), Node->NodePosY);
+        }
 
         // 핀 목록
         TArray<TSharedPtr<FJsonValue>> PinArray;
@@ -716,21 +761,28 @@ TSharedPtr<FJsonObject> FBlueprintHandler::GetBlueprintGraph(const TSharedPtr<FJ
             PinObj->SetStringField(TEXT("direction"), Pin->Direction == EGPD_Input ? TEXT("input") : TEXT("output"));
             PinObj->SetStringField(TEXT("pin_type"), Pin->PinType.PinCategory.ToString());
 
-            // 연결된 핀 목록
-            TArray<TSharedPtr<FJsonValue>> Links;
-            for (UEdGraphPin* LinkedPin : Pin->LinkedTo)
+            if (bIncludePinLinks)
             {
-                if (!LinkedPin || !LinkedPin->GetOwningNode()) continue;
-                auto LinkObj = MakeShared<FJsonObject>();
-                LinkObj->SetStringField(TEXT("node_id"), LinkedPin->GetOwningNode()->NodeGuid.ToString());
-                LinkObj->SetStringField(TEXT("pin_name"), LinkedPin->PinName.ToString());
-                Links.Add(MakeShared<FJsonValueObject>(LinkObj));
+                TArray<TSharedPtr<FJsonValue>> Links;
+                for (UEdGraphPin* LinkedPin : Pin->LinkedTo)
+                {
+                    if (!LinkedPin || !LinkedPin->GetOwningNode()) continue;
+                    auto LinkObj = MakeShared<FJsonObject>();
+                    LinkObj->SetStringField(TEXT("node_id"), LinkedPin->GetOwningNode()->NodeGuid.ToString());
+                    LinkObj->SetStringField(TEXT("pin_name"), LinkedPin->PinName.ToString());
+                    Links.Add(MakeShared<FJsonValueObject>(LinkObj));
+                }
+                PinObj->SetArrayField(TEXT("links"), Links);
             }
-            PinObj->SetArrayField(TEXT("links"), Links);
+            else
+            {
+                PinObj->SetArrayField(TEXT("links"), TArray<TSharedPtr<FJsonValue>>());
+            }
             PinArray.Add(MakeShared<FJsonValueObject>(PinObj));
         }
         NodeObj->SetArrayField(TEXT("pins"), PinArray);
         NodeArray.Add(MakeShared<FJsonValueObject>(NodeObj));
+        IncludedCount++;
     }
 
     auto Data = MakeShared<FJsonObject>();
@@ -738,6 +790,11 @@ TSharedPtr<FJsonObject> FBlueprintHandler::GetBlueprintGraph(const TSharedPtr<FJ
     Data->SetStringField(TEXT("graph_name"), TargetGraph->GetName());
     Data->SetArrayField(TEXT("nodes"), NodeArray);
     Data->SetNumberField(TEXT("node_count"), NodeArray.Num());
+    Data->SetNumberField(TEXT("total_count"), OriginalCount);
+    if (NodeLimit > 0 && IncludedCount >= NodeLimit && OriginalCount > NodeLimit)
+    {
+        Data->SetNumberField(TEXT("truncated_at"), NodeLimit);
+    }
     return MakeSuccess(Data);
 }
 

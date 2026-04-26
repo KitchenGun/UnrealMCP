@@ -423,6 +423,21 @@ TSharedPtr<FJsonObject> FAdvancedHandler::InspectUObject(const TSharedPtr<FJsonO
     Params->TryGetBoolField(TEXT("include_functions"),  bIncludeFunctions);
     Params->TryGetStringField(TEXT("property_filter"),  PropFilter);
 
+    // Phase A C++ filters — limit serialization volume early
+    int32 MaxProps = 0;
+    int32 MaxFuncs = 0;
+    {
+        double V = 0.0;
+        if (Params->TryGetNumberField(TEXT("max_properties"), V) && V > 0.0)
+        {
+            MaxProps = static_cast<int32>(V);
+        }
+        if (Params->TryGetNumberField(TEXT("max_functions"), V) && V > 0.0)
+        {
+            MaxFuncs = static_cast<int32>(V);
+        }
+    }
+
     // 클래스 또는 에셋에서 UClass 결정
     UClass* TargetClass = nullptr;
     UObject* LoadedObj = nullptr;
@@ -469,6 +484,7 @@ TSharedPtr<FJsonObject> FAdvancedHandler::InspectUObject(const TSharedPtr<FJsonO
     if (bIncludeProps)
     {
         TArray<TSharedPtr<FJsonValue>> Properties;
+        int32 MatchedProps = 0;
         for (TFieldIterator<FProperty> It(TargetClass); It; ++It)
         {
             FProperty* Prop = *It;
@@ -478,6 +494,12 @@ TSharedPtr<FJsonObject> FAdvancedHandler::InspectUObject(const TSharedPtr<FJsonO
                 !PropName.Contains(PropFilter, ESearchCase::IgnoreCase))
             {
                 continue;
+            }
+
+            MatchedProps++;
+            if (MaxProps > 0 && Properties.Num() >= MaxProps)
+            {
+                continue;  // keep counting matched, stop appending
             }
 
             TSharedPtr<FJsonObject> PropObj = MakeShared<FJsonObject>();
@@ -500,15 +522,28 @@ TSharedPtr<FJsonObject> FAdvancedHandler::InspectUObject(const TSharedPtr<FJsonO
         }
         Result->SetArrayField(TEXT("properties"), Properties);
         Result->SetNumberField(TEXT("property_count"), Properties.Num());
+        Result->SetNumberField(TEXT("total_property_count"), MatchedProps);
+        if (MaxProps > 0 && MatchedProps > MaxProps)
+        {
+            Result->SetNumberField(TEXT("truncated_properties_at"), MaxProps);
+        }
     }
 
     // UFUNCTION 목록
     if (bIncludeFunctions)
     {
         TArray<TSharedPtr<FJsonValue>> Functions;
+        int32 MatchedFuncs = 0;
         for (TFieldIterator<UFunction> It(TargetClass); It; ++It)
         {
             UFunction* Func = *It;
+
+            MatchedFuncs++;
+            if (MaxFuncs > 0 && Functions.Num() >= MaxFuncs)
+            {
+                continue;
+            }
+
             TSharedPtr<FJsonObject> FuncObj = MakeShared<FJsonObject>();
             FuncObj->SetStringField(TEXT("name"), Func->GetName());
 
@@ -525,6 +560,11 @@ TSharedPtr<FJsonObject> FAdvancedHandler::InspectUObject(const TSharedPtr<FJsonO
         }
         Result->SetArrayField(TEXT("functions"), Functions);
         Result->SetNumberField(TEXT("function_count"), Functions.Num());
+        Result->SetNumberField(TEXT("total_function_count"), MatchedFuncs);
+        if (MaxFuncs > 0 && MatchedFuncs > MaxFuncs)
+        {
+            Result->SetNumberField(TEXT("truncated_functions_at"), MaxFuncs);
+        }
     }
 
     return MakeSuccess(Result);

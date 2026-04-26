@@ -22,7 +22,7 @@ def register_light_tools(server: Server) -> None:
         property_name: str,
         value: str,
     ) -> str:
-        """Set a light component property on a light actor.
+        """[Light] Set a light component property on a light actor.
 
         Args:
             name: Light actor name (e.g. "DirectionalLight", "PointLight_0").
@@ -72,7 +72,7 @@ def register_light_tools(server: Server) -> None:
     # --------------------------------------------------------------
     @server.tool("get_light_property")
     async def get_light_property(name: str) -> str:
-        """Get all light component properties from a light actor.
+        """[Light] Get all light component properties from a light actor.
 
         Args:
             name: Light actor name (e.g. "DirectionalLight", "PointLight_0").

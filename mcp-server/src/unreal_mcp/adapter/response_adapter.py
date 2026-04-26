@@ -83,6 +83,64 @@ def _summarize_generic(result: dict[str, Any]) -> str:
     return json.dumps(result, ensure_ascii=False, indent=None)
 
 
+def _summarize_blueprint_graph(result: dict[str, Any]) -> str:
+    """get_blueprint_graph 결과 요약 — 노드 수 + 클래스별 분포."""
+    bp = result.get("blueprint_name", "?")
+    graph = result.get("graph_name", "?")
+    nodes = result.get("nodes") or []
+    total = result.get("total_count", len(nodes))
+    returned = result.get("returned", len(nodes))
+
+    class_counts: dict[str, int] = {}
+    for n in nodes:
+        cls = n.get("node_class", "?")
+        class_counts[cls] = class_counts.get(cls, 0) + 1
+    top = sorted(class_counts.items(), key=lambda x: -x[1])[:5]
+    breakdown = ", ".join(f"{cls}×{c}" for cls, c in top)
+
+    parts = [f"{bp}/{graph}: {returned} nodes"]
+    if total != returned:
+        parts.append(f"(of {total})")
+    if breakdown:
+        parts.append(f"[{breakdown}]")
+    return " ".join(parts)
+
+
+def _summarize_inspect_uobject(result: dict[str, Any]) -> str:
+    """inspect_uobject 결과 요약 — 클래스 + property/function 수."""
+    cls = result.get("class_name", "?")
+    pkg = result.get("package", "")
+    hierarchy = result.get("class_hierarchy") or []
+    props = result.get("properties") or []
+    fns = result.get("functions") or []
+    total_props = result.get("total_property_count", result.get("property_count", len(props)))
+    total_fns = result.get("total_function_count", result.get("function_count", len(fns)))
+
+    parts = [f"{cls}"]
+    if pkg:
+        parts.append(f"({pkg})")
+    if hierarchy:
+        parts.append(f"hierarchy={'->'.join(hierarchy[:3])}")
+    parts.append(f"props={len(props)}/{total_props}")
+    if fns or result.get("function_count"):
+        parts.append(f"fns={len(fns)}/{total_fns}")
+    return " ".join(parts)
+
+
+def _summarize_search_assets(result: dict[str, Any]) -> str:
+    """search_assets 결과 요약 — 매칭 수 + 첫 N개 경로."""
+    assets = result.get("assets") or []
+    total = result.get("total_count", result.get("count", len(assets)))
+    has_more = result.get("has_more", False)
+
+    if not assets:
+        return f"매칭 없음 (total={total})"
+
+    names = [a.get("name", "?") for a in assets[:5]]
+    suffix = " ..." if has_more or len(assets) < total else ""
+    return f"{len(assets)}/{total}: {', '.join(names)}{suffix}"
+
+
 # tool 이름 → 결과 요약 함수 매핑
 _SUMMARIZERS: dict[str, Any] = {
     "create_actor":          _summarize_actor,
@@ -93,6 +151,9 @@ _SUMMARIZERS: dict[str, Any] = {
     "set_actor_transform":   _summarize_transform,
     "get_actors_in_level":   _summarize_actors_list,
     "find_actors_by_name":   _summarize_actors_list,
+    "get_blueprint_graph":   _summarize_blueprint_graph,
+    "inspect_uobject":       _summarize_inspect_uobject,
+    "search_assets":         _summarize_search_assets,
 }
 
 

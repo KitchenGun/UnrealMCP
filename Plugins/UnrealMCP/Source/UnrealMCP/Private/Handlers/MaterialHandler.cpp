@@ -112,6 +112,21 @@ TSharedPtr<FJsonObject> FMaterialHandler::SearchAssets(const TSharedPtr<FJsonObj
         SearchPath = TEXT("/Game");
     }
 
+    // Phase A C++ pagination
+    int32 PageLimit = 0;
+    int32 PageOffset = 0;
+    {
+        double V = 0.0;
+        if (Params->TryGetNumberField(TEXT("limit"), V) && V > 0.0)
+        {
+            PageLimit = static_cast<int32>(V);
+        }
+        if (Params->TryGetNumberField(TEXT("offset"), V) && V >= 0.0)
+        {
+            PageOffset = static_cast<int32>(V);
+        }
+    }
+
     FAssetRegistryModule& AssetRegistry =
         FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 
@@ -127,6 +142,8 @@ TSharedPtr<FJsonObject> FMaterialHandler::SearchAssets(const TSharedPtr<FJsonObj
     TArray<FAssetData> AssetDataList;
     AssetRegistry.Get().GetAssets(Filter, AssetDataList);
 
+    // Two-phase: count matches first, then slice for pagination.
+    int32 MatchedTotal = 0;
     TArray<TSharedPtr<FJsonValue>> ResultArray;
     for (const FAssetData& Asset : AssetDataList)
     {
@@ -135,6 +152,19 @@ TSharedPtr<FJsonObject> FMaterialHandler::SearchAssets(const TSharedPtr<FJsonObj
         if (!Query.IsEmpty() && !AssetName.Contains(Query, ESearchCase::IgnoreCase))
         {
             continue;
+        }
+
+        const int32 MatchIndex = MatchedTotal;
+        MatchedTotal++;
+
+        // pagination window check
+        if (MatchIndex < PageOffset)
+        {
+            continue;
+        }
+        if (PageLimit > 0 && ResultArray.Num() >= PageLimit)
+        {
+            continue;  // keep counting matched, stop appending
         }
 
         TSharedPtr<FJsonObject> AssetObj = MakeShared<FJsonObject>();
@@ -148,6 +178,11 @@ TSharedPtr<FJsonObject> FMaterialHandler::SearchAssets(const TSharedPtr<FJsonObj
     TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
     Result->SetArrayField(TEXT("assets"), ResultArray);
     Result->SetNumberField(TEXT("count"), ResultArray.Num());
+    Result->SetNumberField(TEXT("total_count"), MatchedTotal);
+    Result->SetNumberField(TEXT("returned"), ResultArray.Num());
+    const int32 NextOffset = PageOffset + ResultArray.Num();
+    Result->SetNumberField(TEXT("next_offset"), NextOffset < MatchedTotal ? NextOffset : -1);
+    Result->SetBoolField(TEXT("has_more"), NextOffset < MatchedTotal);
     return MakeSuccess(Result);
 }
 
